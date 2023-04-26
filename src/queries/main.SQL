@@ -311,6 +311,13 @@ SELECT
 -- illness severity - admission
   , oa.oasis
   , oa.oasis_prob AS prob_mort
+  , sf.sofa AS SOFA_admit
+  , sf.respiration AS respiratory_admit
+  , sf.coagulation AS coagulation_admit
+  , sf.liver AS liver_admit
+  , sf.cardiovascular AS cardiovascular_admit
+  , sf.cns AS cns_admit
+  , sf.renal AS renal_admit
 
 -- SOFA and components - day 1
   , sofa1.sofa_24hours            AS sofa_max_0_24h

@@ -14,7 +14,7 @@ print(f"{len(df1)} sepsis stays \n({demo1})\n")
 
 # Remove patiens without Full Code
 df2 = df1[(df1.is_full_code_admission == 1) & (df1.is_full_code_discharge == 1)]
-print(f"Removed {len(df1) - len(df2)} stays without Full Code")
+print(f"Removed {len(df1) - len(df2)} stays without Full Code (admission and discharge)")
 demo2 = print_demo(get_demography(df2))
 print(f"{len(df2)} stays with sepsis and Full Code \n({demo2})\n")
 
@@ -22,13 +22,13 @@ print(f"{len(df2)} stays with sepsis and Full Code \n({demo2})\n")
 df3 = df2[df2.race_group != "Other"]
 print(f"Removed {len(df2) - len(df3)} patients with no race information or other")
 demo3 = print_demo(get_demography(df3))
-print(f"{len(df3)} ICU stays with sepsis, 1d <= ICU LoS <= 30d, and race known \n({demo3})\n")
+print(f"{len(df3)} ICU stays with sepsis, full code, and race known \n({demo3})\n")
 
 # Remove patients with LoS > 30 days
 df4 = df3[df3.los_icu <= 30]
 print(f"Removed {len(df3) - len(df4)} stays with LoS > 30 days")
 demo4 = print_demo(get_demography(df4))
-print(f"{len(df4)} stays with sepsis, 1 day <= ICU LoS <= 30 days \n({demo4})\n")
+print(f"{len(df4)} stays with sepsis, full code, known race, and 1 day <= ICU LoS <= 30 days \n({demo4})\n")
 
 # Create 4 new cohorts, iterating, removing patients with LoS < 2 day , 3 days, 4 days, 5 days
 for los_min in range(2, 6):
