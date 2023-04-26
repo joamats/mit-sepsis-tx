@@ -1,7 +1,7 @@
 from tableone import TableOne
 import pandas as pd
 
-def table_one(cohort_number, hr_period, sf_period):
+def table_one(cohort_number, hr_period, sf_period, hr_bound):
 
     data = pd.read_csv(f'data/MIMIC_coh_{cohort_number}.csv')
 
@@ -25,11 +25,16 @@ def table_one(cohort_number, hr_period, sf_period):
     data['fluids_overall'] = data['fluids_volume'].apply(lambda x: 1. if x > 0 else 0.)
 
     # Encode absolute durations and offsets into hours
-    data['MV_time_abs'] = data['MV_time_abs'] * 24
-    data['VP_time_abs'] = data['VP_time_abs'] * 24
-    data['MV_init_offset_abs'] = data['MV_init_offset_abs'] * 24
-    data['RRT_init_offset_abs'] = data['RRT_init_offset_abs'] * 24
-    data['VP_init_offset_abs'] = data['VP_init_offset_abs'] * 24
+    data['MV_time_abs_hours'] = data['MV_time_abs'] * 24
+    data['VP_time_abs_hours'] = data['VP_time_abs'] * 24
+    data['MV_init_offset_abs_hours'] = data['MV_init_offset_abs'] * 24
+    data['RRT_init_offset_abs_hours'] = data['RRT_init_offset_abs'] * 24
+    data['VP_init_offset_abs_hours'] = data['VP_init_offset_abs'] * 24
+
+    # encode treatment according to elegibity window, hr_bound
+    data['MV_elig'] = data['MV_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x <= hr_bound[1]) else 0)
+    data['RRT_elig'] = data['RRT_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x <= hr_bound[1]) else 0)
+    data['VP_elig'] = data['VP_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x <= hr_bound[1]) else 0)
 
     # Encode NA as 0, if missing means 0
     cols_na = ['major_surgery', 'insulin_yes', 'transfusion_yes', 'hypertension_present',
@@ -53,6 +58,9 @@ def table_one(cohort_number, hr_period, sf_period):
         "major_surgery": [1., 0.],
         "mortality_in": [1, 0],
         "mortality_90": [1, 0],
+        "MV_elig": [1, 0],
+        "RRT_elig": [1, 0],
+        "VP_elig": [1, 0],
         "mech_vent_overall": [1, 0],
         "rrt_overall": [1, 0],
         "vasopressor_overall": [1, 0],
@@ -77,6 +85,9 @@ def table_one(cohort_number, hr_period, sf_period):
             "mortality_in": 1,
             "mortality_90": 1,
             "eng_prof": 1,
+            "MV_elig": 1,
+            "RRT_elig": 1,
+            "VP_elig": 1,
             "mech_vent_overall": 1,
             "rrt_overall": 1,
             "vasopressor_overall": 1,
@@ -100,6 +111,7 @@ def table_one(cohort_number, hr_period, sf_period):
             'insurance', 'eng_prof',
             'adm_elective', 'major_surgery',
             'mortality_in', 'mortality_90',
+            'MV_elig', 'RRT_elig', 'VP_elig',
             'mech_vent_overall', 'rrt_overall', 'vasopressor_overall',
             'insulin_yes', 'transfusion_yes', 'fluids_overall',
             'hypertension_present', 'heart_failure_present',
@@ -125,11 +137,13 @@ def table_one(cohort_number, hr_period, sf_period):
                'fluids_volume',
                'fluids_volume_norm_by_los_icu',
                f'FiO2_mean_{hr_period}',
-               'MV_time_abs', 'MV_time_perc_of_stay',
-               'MV_init_offset_abs',
-               'RRT_init_offset_abs', 
-               'VP_init_offset_abs', 
-               'VP_time_abs', 'VP_time_perc_of_stay',
+               'MV_time_abs_hours',
+               'MV_time_perc_of_stay',
+               'MV_init_offset_abs_hours',
+               'RRT_init_offset_abs_hours', 
+               'VP_init_offset_abs_hours', 
+               'VP_time_abs_hours',
+               'VP_time_perc_of_stay',
                f'resp_rate_mean_{hr_period}',
                f'mbp_mean_{hr_period}',
                f'temperature_mean_{hr_period}',
@@ -159,6 +173,9 @@ def table_one(cohort_number, hr_period, sf_period):
         'major_surgery': "Major Surgery",
         'insurance': "Health Insurance",
         'race_group': "Race-Ethnicity Group",
+        'MV_elig': "MV initiated in the cohort day",
+        'RRT_elig': "RRT initiated in the cohort day",
+        'VP_elig': "Vasopressor initiated in the cohort day",
         'mech_vent_overall': 'Mechanical Ventilation (whole stay)',
         'rrt_overall': "RRT (whole stay)",
         'vasopressor_overall': 'Vasopressors (whole stay)',
@@ -245,7 +262,6 @@ def table_one(cohort_number, hr_period, sf_period):
         'VP_time_perc_of_stay': 2    
         }
 
-
     # Create a TableOne 
     table1_s = TableOne(data, columns=categ+nonnorm,
                         rename=labls, limit=limit, order=order, decimals=decimals,
@@ -253,25 +269,26 @@ def table_one(cohort_number, hr_period, sf_period):
                         missing=True, overall=False,
                         dip_test=True, normal_test=True, tukey_test=True, htest_name=True)
 
-    table1_s.to_excel(f'results/table1_coh{cohort_number}.xlsx')
+    table1_s.to_excel(f'results/table1_coh_{cohort_number}.xlsx')
 
-    # save data for further analysis
-    data.to_csv(f'data/clean/MIMIC_coh{cohort_number}', index=False)
+    # save data for further analysi
+    data.to_csv(f'data/MIMIC_coh_{cohort_number}.csv', index=False)
 
 
 cohorts = [1,2,3,4]
 hr_periods = ["6_24h", "24_48h", "48_72h", "72_96h"]
 sf_periods = ["0_24h", "24_48h", "48_72h", "72_96h"]
+hr_bounds  = [[0,24], [24,48], [48,72], [72,96]]
 
 for i in range(len(cohorts)):
-    print(f"Processing cohort {cohorts[i]}")
-    #table_one(cohorts[i], hr_periods[i], sf_periods[i])
+    print(f"Processing cohort {cohorts[i]}...")
+    table_one(cohorts[i], hr_periods[i], sf_periods[i], hr_bounds[i])
 
 tables = []
 # Read all tables and merge them with a loop
 for i in range(1,5):
 
-    table = pd.read_excel(f'results/table1_coh{i}.xlsx')
+    table = pd.read_excel(f'results/table1_coh_{i}.xlsx')
 
     if i == 1:
         # keep just the first 2 columns

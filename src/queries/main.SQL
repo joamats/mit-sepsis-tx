@@ -73,7 +73,7 @@ WITH
     SELECT
       ce.stay_id
     , SUM(amount) AS fluids_volume
-    , SUM(amount)/MAX(icu.los_icu) AS fluids_volume_norm_BY_los_icu
+    , SUM(amount)/MAX(icu.los_icu) AS fluids_volume_norm_by_los_icu
     , MAX(icu.los_icu) AS los_icu
 
     FROM  `physionet-data.mimiciv_icu.inputevents` ce
