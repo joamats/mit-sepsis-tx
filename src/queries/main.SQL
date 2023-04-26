@@ -296,7 +296,7 @@ SELECT
          LOWER(icu.race) LIKE "%asian%"
       ) THEN "Asian"
       ELSE "Other"
-    END AS race_GROUP
+    END AS race_group
 
   , weight.weight_admit
   , charlson.charlson_comorbidity_index
