@@ -273,7 +273,7 @@ SELECT
   , CASE WHEN s3.sepsis3 IS TRUE THEN 1 ELSE 0 END AS sepsis3
 
 -- baseline clinical and demographics vars
-  , pat.anchor_year_GROUP
+  , pat.anchor_year_group
   , icu.admission_age
   , icu.gender
   , CASE WHEN icu.gender = "F" THEN 1 ELSE 0 END AS sex_female
@@ -356,10 +356,10 @@ SELECT
   , sofa4.renal_24hours           AS renal_max_72_96h
 
 -- FiO2 per day
-  , fio2_24h.Fio2_mean_6_24h
-  , fio2_48h.Fio2_mean_24_48h
-  , fio2_72h.Fio2_mean_48_72h
-  , fio2_96h.Fio2_mean_72_96h
+  , fio2_24h.FiO2_mean_6_24h
+  , fio2_48h.FiO2_mean_24_48h
+  , fio2_72h.FiO2_mean_48_72h
+  , fio2_96h.FiO2_mean_72_96h
 
 -- fluids - per day
   , fluids_24h.fluids_6_24h
@@ -369,7 +369,7 @@ SELECT
 
 -- treatments - overall
   , fluids_volume
-  , fluids_volume_norm_BY_los_icu
+  , fluids_volume_norm_by_los_icu
   , transfusion_yes
   , insulin_yes
 

@@ -1,12 +1,15 @@
 from tableone import TableOne
 import pandas as pd
 
+def table_one(cohort_number, hr_period, sf_period):
 
+    data = pd.read_csv(f'data/MIMIC_coh_{cohort_number}.csv')
 
-    data = pd.read_csv(f'data/MIMIC_coh{}.csv')
+    # Encode race_white as being white vs. non-white
+    data['race_white'] = data.race_group.apply(lambda x: "White" if x == "White" else "Racial-Ethnic Group")
 
     # Groupby Variable
-    groupby = ['race_group']
+    groupby = ['race_white']
 
     # Continuous Variables
     data['los_hosp_dead'] = data[data.mortality_in == 1].los_hospital
@@ -42,7 +45,7 @@ import pandas as pd
     data['ckd_stages'] = data['ckd_stages'].apply(lambda x: "Absent" if x == 0 else x)
 
     order = {
-        "race_group": ["White", "Black", "Hispanic", "Asian", "Other"],
+        #"race_group": ["White", "Black", "Hispanic", "Asian", "Other"],
         "gender": ["F", "M"],
         "eng_prof": ["Limited", "Proficient"],
         "insurance": ["Medicare", "Medicaid", "Other"],
@@ -66,8 +69,6 @@ import pandas as pd
         "uti": [1., 0.],
         "biliary": [1., 0.],
         "skin": [1., 0.],
-        "is_full_code_admission": [1, 0],
-        "is_full_code_discharge": [1, 0]
     }
 
     limit = {"gender": 1,
@@ -92,8 +93,6 @@ import pandas as pd
             "uti": 1,
             "biliary": 1,
             "skin": 1,
-            "is_full_code_admission": 1,
-            "is_full_code_discharge": 1
             }
 
 
@@ -106,30 +105,46 @@ import pandas as pd
             'hypertension_present', 'heart_failure_present',
             'copd_present', 'asthma_present', 'cad_present',
             'ckd_stages', 'diabetes_types', 'connective_disease',
-            'pneumonia', 'uti', 'biliary', 'skin',
-            'is_full_code_admission', 'is_full_code_discharge',
-
+            'pneumonia', 'uti', 'biliary', 'skin'
             ]
 
     nonnorm = ['admission_age', 
-            'los_icu_dead', 'los_icu_surv',
-            'los_hosp_dead', 'los_hosp_surv',
-            'charlson_comorbidity_index', 'SOFA',
-            'respiration', 'coagulation', 'liver', 'cardiovascular', 'cns', 'renal',
-            'lactate_day1', 'lactate_freq_day1',
-            'lactate_day2', 'lactate_freq_day2',
-            'fluids_volume', 'fluids_volume_norm_by_los_icu',
-            'FiO2_mean_24h',
-            'MV_time_abs', 'MV_time_perc_of_stay',
-            'MV_init_offset_abs', #'MV_init_offset_perc',
-            'RRT_init_offset_abs', #'RRT_init_offset_perc',
-            'VP_init_offset_abs', #'VP_init_offset_perc',
-            'VP_time_abs', 'VP_time_perc_of_stay',
-            'resp_rate_mean', 'mbp_mean', 'temperature_mean',
-            'spo2_mean', 'heart_rate_mean',
-            'po2_min', 'pco2_max', 'ph_min', 'glucose_max',
-            'sodium_min', 'potassium_max', 'cortisol_min', 'hemoglobin_min',
-            'fibrinogen_min', 'inr_max'
+               'los_icu_dead', 'los_icu_surv',
+               'los_hosp_dead', 'los_hosp_surv',
+               'charlson_comorbidity_index',
+               'SOFA_admit', 'respiratory_admit', 'coagulation_admit',
+               'liver_admit', 'cardiovascular_admit', 'cns_admit', 'renal_admit',
+               f'sofa_max_{sf_period}',
+               f'respiratory_max_{sf_period}',
+               f'coagulation_max_{sf_period}',
+               f'liver_max_{sf_period}',
+               f'cardiovascular_max_{sf_period}',
+               f'cns_max_{sf_period}',
+               f'renal_max_{sf_period}',
+               f'fluids_{hr_period}',
+               'fluids_volume',
+               'fluids_volume_norm_by_los_icu',
+               f'FiO2_mean_{hr_period}',
+               'MV_time_abs', 'MV_time_perc_of_stay',
+               'MV_init_offset_abs',
+               'RRT_init_offset_abs', 
+               'VP_init_offset_abs', 
+               'VP_time_abs', 'VP_time_perc_of_stay',
+               f'resp_rate_mean_{hr_period}',
+               f'mbp_mean_{hr_period}',
+               f'temperature_mean_{hr_period}',
+               f'spo2_mean_{hr_period}',
+               f'heart_rate_mean_{hr_period}',
+               f'po2_min_{hr_period}',
+               f'pco2_max_{hr_period}',
+               f'ph_min_{hr_period}',
+               f'glucose_max_{hr_period}',
+               f'sodium_min_{hr_period}',
+               f'potassium_max_{hr_period}',
+               f'cortisol_min_{hr_period}',
+               f'hemoglobin_min_{hr_period}',
+               f'fibrinogen_min_{hr_period}',
+               f'inr_max_{hr_period}'
             ]  
 
     labls = {
@@ -162,68 +177,66 @@ import pandas as pd
         'uti': "Urinary Tract Infection",
         'biliary': "Biliary Tract Infection",
         'skin': "Skin Infection",
-        'is_full_code_admission': "Full Code (Admission)",
-        'is_full_code_discharge': "Full Code (Discharge)",
         'los_icu_dead': "ICU LOS (days, if deceased)",
         'los_icu_surv': "ICU LOS (days, if survived)",
         'los_hosp_dead': "Hospital LOS (days, if deceased)",
         'los_hosp_surv': "Hospital LOS (days, if survived)",
         'charlson_comorbidity_index': "Charlson Comorbidity Index",
-        'SOFA': "SOFA Score (Admission, first 24h)",
-        'respiration': "SOFA: Respiration (first 24h)",
-        'coagulation': "SOFA: Coagulation (first 24h)",
-        'liver': "SOFA: Liver (first 24h)",
-        'cardiovascular': "SOFA: Cardiovascular (first 24h)",
-        'cns': "SOFA: CNS (first 24h)",
-        'renal': "SOFA: Renal (first 24h)",
-        'lactate_day1': "Lactate Day 1 (maximum value)",
-        'lactate_freq_day1': "Lactate Day 1 (number of measurements)",
-        'lactate_day2': "Lactate Day 2 (maximum value)",
-        'lactate_freq_day2': "Lactate Day 2 (number of measurements)",
+        'SOFA_admit': "SOFA Score (admission)",
+        f'respiratory_admit': "SOFA: Respiratory (admission)",
+        f'coagulation_admit': "SOFA: Coagulation (admission)",
+        f'liver_admit': "SOFA: Liver (admission)",
+        f'cardiovascular_admit': "SOFA: Cardiovascular (admission)",
+        f'cns_admit': "SOFA: CNS (admission)",
+        f'renal_admit': "SOFA: Renal (admission)",
+        f'sofa_max_{sf_period}': "SOFA (day)",
+        f'respiratory_max_{sf_period}': "SOFA: Respiratory (day)",
+        f'coagulation_max_{sf_period}': "SOFA: Coagulation (day)",
+        f'liver_max_{sf_period}': "SOFA: Liver (day)",
+        f'cardiovascular_max_{sf_period}': "SOFA: Cardiovascular (day)",
+        f'cns_max_{sf_period}': "SOFA: CNS (day)",
+        f'renal_max_{sf_period}': "SOFA: Renal (day)",
+        f'fluids_{hr_period}': "Fluids Volume (day)",
         'fluids_volume': "Fluids Volume (whole stay)",
         'fluids_volume_norm_by_los_icu': "Fluids Volume (whole stay, normalized by ICU LOS)",
-        'FiO2_mean_24h': "FiO2 (mean %, first 24h)",
         'MV_time_abs': "MV Time (duration in the stay, hours)",
         'MV_time_perc_of_stay': "MV Time (duration in the stay, % of ICU LOS)",
-        # 'MV_init_offset_perc': "MV Initiation (offset, % of ICU LOS)",
         'MV_init_offset_abs': "MV Initiation (offset, hours)",
-        # 'RRT_init_offset_perc': "RRT Initiation (offset, % of ICU LOS)",
         'RRT_init_offset_abs': "RRT Initiation (offset, hours)",
-        # 'VP_init_offset_perc': "Vasopressor Initiation (offset, % of ICU LOS)",
         'VP_init_offset_abs': "Vasopressor Initiation (offset, hours)",
         'VP_time_abs': "Vasopressor Time (duration in the stay, hours)",
         'VP_time_perc_of_stay': "Vasopressor Time (duration in the stay, % of ICU LOS)",
-        'resp_rate_mean': "Respiratory Rate (mean, first 24h)",
-        'mbp_mean': "Mean Blood Pressure (mean, first 24h)",
-        'temperature_mean': "Temperature (mean, first 24h)",
-        'spo2_mean': "SpO2 (mean, first 24h)",
-        'heart_rate_mean': "Heart Rate (mean, first 24h)",
-        'po2_min': "PaO2 (min, first 24h)",
-        'pco2_max': "PaCO2 (max, first 24h)",
-        'ph_min': "pH (min, first 24h)",
-        'glucose_max': "Glucose (max, first 24h)",
-        'sodium_min': "Sodium (min, first 24h)",
-        'potassium_max': "Potassium (max, first 24h)",
-        'cortisol_min': "Cortisol (min, first 24h)",
-        'hemoglobin_min': "Hemoglobin (min, first 24h)",
-        'fibrinogen_min': "Fibrinogen (min, first 24h)",
-        'inr_max': "INR (max, first 24h)"
+        f'FiO2_mean_{hr_period}': "FiO2 (mean %)",
+        f'resp_rate_mean_{hr_period}': "Respiratory Rate (mean)",
+        f'mbp_mean_{hr_period}': "Mean Blood Pressure (mean)",
+        f'temperature_mean_{hr_period}': "Temperature (mean, first 24h)",
+        f'spo2_mean_{hr_period}': "SpO2 (%, mean)",
+        f'heart_rate_mean_{hr_period}': "Heart Rate (mean)",
+        f'po2_min_{hr_period}': "PaO2 (min)",
+        f'pco2_max_{hr_period}': "PaCO2 (max)",
+        f'ph_min_{hr_period}': "pH (min)",
+        f'glucose_max_{hr_period}': "Glucose (max)",
+        f'sodium_min_{hr_period}': "Sodium (min)",
+        f'potassium_max_{hr_period}': "Potassium (max)",
+        f'cortisol_min_{hr_period}': "Cortisol (min)",
+        f'hemoglobin_min_{hr_period}': "Hemoglobin (min)",
+        f'fibrinogen_min_{hr_period}': "Fibrinogen (min)",
+        f'inr_max_{hr_period}': "INR (max)"
         }
 
     decimals = {
         'admission_age': 0,
         'fluids_volume': 0,
-        'lacate_day1': 2,
-        'lactate_day2': 2,
-        'SOFA': 0,
-        'respiration': 0,
-        'coagulation': 0,
-        'liver': 0,
-        'cardiovascular': 0,
-        'cns': 0,
-        'renal': 0,
+        f'fluids_{hr_period}': 0,
+        'SOFA_admit': 0,
+        'respiratory_admit': 0,
+        'coagulation_admit': 0,
+        'liver_admit': 0,
+        'cardiovascular_admit': 0,
+        'cns_admit': 0,
+        'renal_admit': 0,
         'charlson_comorbidity_index': 0,
-        'FiO2_mean_24h': 0,
+        f'FiO2_mean_{hr_period}': 0,
         'los_icu_dead': 2,
         'los_icu_surv': 2,
         'los_hosp_dead': 2,
@@ -240,8 +253,41 @@ import pandas as pd
                         missing=True, overall=False,
                         dip_test=True, normal_test=True, tukey_test=True, htest_name=True)
 
-    table1_s.to_excel('results/table1_MIMIC.xlsx')
+    table1_s.to_excel(f'results/table1_coh{cohort_number}.xlsx')
 
     # save data for further analysis
-    data.to_csv(f'data/clean/MIMIC_coh{}', index=False)
+    data.to_csv(f'data/clean/MIMIC_coh{cohort_number}', index=False)
 
+
+cohorts = [1,2,3,4]
+hr_periods = ["6_24h", "24_48h", "48_72h", "72_96h"]
+sf_periods = ["0_24h", "24_48h", "48_72h", "72_96h"]
+
+for i in range(len(cohorts)):
+    print(f"Processing cohort {cohorts[i]}")
+    #table_one(cohorts[i], hr_periods[i], sf_periods[i])
+
+tables = []
+# Read all tables and merge them with a loop
+for i in range(1,5):
+
+    table = pd.read_excel(f'results/table1_coh{i}.xlsx')
+
+    if i == 1:
+        # keep just the first 2 columns
+        tables.append(table.iloc[:, :2])
+
+    # drop the first 2 columns
+    table = table.iloc[:, 2:]
+
+    # make and header with the cohort number
+    header = pd.DataFrame([f"Day {i}"] * len(table.columns), index=table.columns).T
+    # concatenate the header and the table
+    table = pd.concat([header, table], axis=0)
+
+    tables.append(table)
+
+# concatenate in a single table, but index just once
+table1 = pd.concat(tables, axis=1)
+
+table1.to_excel('results/table1_all.xlsx', index=False, header=False)
