@@ -113,7 +113,8 @@ def clean_data(cohort_number, hr_period, sf_period):
                 ['admission_age', 'sex_female', 'race_white', 'eng_prof', 'private_insurance'] + \
                 ['anchor_year_group', 'adm_elective', 'major_surgery'] + \
                 ['charlson_comorbidity_index'] + \
-                ['SOFA_admit', 'respiratory_admit', 'cardiovascular_admit', 'cns_admit', 'renal_admit', 'liver_admit'] + \
+                ['SOFA_admit', 'respiratory_admit', 'coagulation_admit','cardiovascular_admit',
+                 'cns_admit', 'renal_admit', 'liver_admit'] + \
                 com_cols + ['ckd_stages'] + \
                 list(rename_dict.values()) + \
                 ['MV_elig_day','MV_elig1', 'MV_elig2', 'MV_elig3', 'MV_elig4',

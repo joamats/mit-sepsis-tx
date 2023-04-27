@@ -10,6 +10,7 @@ major_surgery
 charlson_comorbidity_index
 SOFA_admit
 respiratory_admit
+coagulation_admit
 cardiovascular_admit
 cns_admit
 renal_admit
