@@ -36,10 +36,18 @@ def table_one(cohort_number, hr_period, sf_period):
 
     for i, hr_bound in enumerate(hr_bounds):
 
-        data[f'MV_elig{i+1}'] = data['MV_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x <= hr_bound[1]) else 0)
-        data[f'RRT_elig{i+1}'] = data['RRT_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x <= hr_bound[1]) else 0)
-        data[f'VP_elig{i+1}'] = data['VP_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x <= hr_bound[1]) else 0)
+        data[f'MV_elig{i+1}'] = data['MV_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x < hr_bound[1]) else 0)
+        data[f'RRT_elig{i+1}'] = data['RRT_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x < hr_bound[1]) else 0)
+        data[f'VP_elig{i+1}'] = data['VP_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x < hr_bound[1]) else 0)
 
+    for i in range(3):
+        data['MV_elig_day'] = data['MV_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bounds[cohort_number-1][0]) \
+                                                                                  & (x <= hr_bounds[cohort_number-1][1]) else 0)
+        data['RRT_elig_day'] = data['RRT_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bounds[cohort_number-1][0]) \
+                                                                                    & (x <= hr_bounds[cohort_number-1][1]) else 0)
+        data['VP_elig_day'] = data['VP_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bounds[cohort_number-1][0]) \
+                                                                                    & (x <= hr_bounds[cohort_number-1][1]) else 0)
+        
     # Encode NA as 0, if missing means 0
     cols_na = ['major_surgery', 'insulin_yes', 'transfusion_yes', 'hypertension_present',
                'heart_failure_present', 'copd_present', 'asthma_present', 'cad_present',
@@ -81,10 +89,16 @@ def table_one(cohort_number, hr_period, sf_period):
     }
 
     # add to order dict MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(1,5):
-        order[f'MV_elig{i}'] = [1, 0]
-        order[f'RRT_elig{i}'] = [1, 0]
-        order[f'VP_elig{i}'] = [1, 0]
+    for i in range(5):
+        if i == 0:
+            order[f'MV_elig_day'] = [1, 0]
+            order[f'RRT_elig_day'] = [1, 0]
+            order[f'VP_elig_day'] = [1, 0]
+        
+        else:
+            order[f'MV_elig{i}'] = [1, 0]
+            order[f'RRT_elig{i}'] = [1, 0]
+            order[f'VP_elig{i}'] = [1, 0]
 
     limit = {"gender": 1,
             "adm_elective": 1,
@@ -114,10 +128,16 @@ def table_one(cohort_number, hr_period, sf_period):
             }
     
     # add to limit dict MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(1,5):
-        limit[f'MV_elig{i}'] = 1
-        limit[f'RRT_elig{i}'] = 1
-        limit[f'VP_elig{i}'] = 1
+    for i in range(5):
+        if i == 0:
+            limit[f'MV_elig_day'] = 1
+            limit[f'RRT_elig_day'] = 1
+            limit[f'VP_elig_day'] = 1
+        
+        else:
+            limit[f'MV_elig{i}'] = 1
+            limit[f'RRT_elig{i}'] = 1
+            limit[f'VP_elig{i}'] = 1
 
 
     categ = ['anchor_year_group', 'gender',
@@ -133,10 +153,16 @@ def table_one(cohort_number, hr_period, sf_period):
             ]
 
     # add to categ list MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(1,5):
-        categ.append(f'MV_elig{i}')
-        categ.append(f'RRT_elig{i}')
-        categ.append(f'VP_elig{i}')
+    for i in range(5):
+        if i == 0:
+            categ.append(f'MV_elig_day')
+            categ.append(f'RRT_elig_day')
+            categ.append(f'VP_elig_day')
+        
+        else:
+            categ.append(f'MV_elig{i}')
+            categ.append(f'RRT_elig{i}')
+            categ.append(f'VP_elig{i}')
 
     nonnorm = ['admission_age', 
                'los_icu_dead', 'los_icu_surv',
@@ -260,10 +286,15 @@ def table_one(cohort_number, hr_period, sf_period):
         }
     
     # add to lbls MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(1, 5):
-        labls[f'MV_elig{i}'] = f"MV initiated in day {i}"
-        labls[f'RRT_elig{i}'] = f"RRT initiated in day {i}"
-        labls[f'VP_elig{i}'] = f"Vasopressor initiated in day {i}"
+    for i in range(5):
+        if i == 0:
+            labls[f'MV_elig{i}'] = f"MV initiated in the cohort day"
+            labls[f'RRT_elig{i}'] = f"RRT initiated in the cohort day"
+            labls[f'VP_elig{i}'] = f"Vasopressor initiated in the cohort day"
+        else:
+            labls[f'MV_elig{i}'] = f"MV initiated in day {i}"
+            labls[f'RRT_elig{i}'] = f"RRT initiated in day {i}"
+            labls[f'VP_elig{i}'] = f"Vasopressor initiated in day {i}"
 
 
     decimals = {
@@ -294,7 +325,7 @@ def table_one(cohort_number, hr_period, sf_period):
                         missing=True, overall=False,
                         dip_test=True, normal_test=True, tukey_test=True, htest_name=True)
 
-    table1_s.to_excel(f'results/table1_coh_{cohort_number}.xlsx')
+    table1_s.to_excel(f'results/table1/coh_{cohort_number}.xlsx')
 
     # save data for further analysi
     data.to_csv(f'data/MIMIC_coh_{cohort_number}.csv', index=False)
@@ -312,7 +343,7 @@ tables = []
 # Read all tables and merge them with a loop
 for i in range(1,5):
 
-    table = pd.read_excel(f'results/table1_coh_{i}.xlsx')
+    table = pd.read_excel(f'results/table1/coh_{i}.xlsx')
 
     if i == 1:
         # keep just the first 2 columns
@@ -331,4 +362,4 @@ for i in range(1,5):
 # concatenate in a single table, but index just once
 table1 = pd.concat(tables, axis=1)
 
-table1.to_excel('results/table1_all.xlsx', index=False, header=False)
+table1.to_excel('results/table1/all.xlsx', index=False, header=False)

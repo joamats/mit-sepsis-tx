@@ -116,7 +116,10 @@ def clean_data(cohort_number, hr_period, sf_period):
                 ['SOFA_admit', 'respiratory_admit', 'cardiovascular_admit', 'cns_admit', 'renal_admit', 'liver_admit'] + \
                 com_cols + ['ckd_stages'] + \
                 list(rename_dict.values()) + \
-                ['MV_elig', 'RRT_elig', 'VP_elig']
+                ['MV_elig_day','MV_elig1', 'MV_elig2', 'MV_elig3', 'MV_elig4',
+                 'RRT_elig_day','RRT_elig1', 'RRT_elig2', 'RRT_elig3', 'RRT_elig4',
+                 'VP_elig_day','VP_elig1', 'VP_elig2', 'VP_elig3', 'VP_elig4'] + \
+                 ['pneumonia', 'uti', 'biliary', 'skin']
     ]
 
     # get rename_dict values in list
@@ -130,5 +133,5 @@ sf_periods = ["0_24h", "24_48h", "48_72h", "72_96h"]
 hr_bounds  = [[0,24], [24,48], [48,72], [72,96]]
 
 for i in range(len(cohorts)):
-    print(f"Processing cohort {cohorts[i]}")
+    print(f"Processing cohort {cohorts[i]}...")
     clean_data(cohorts[i], hr_periods[i], sf_periods[i])
