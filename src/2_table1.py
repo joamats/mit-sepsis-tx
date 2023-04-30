@@ -1,7 +1,7 @@
 from tableone import TableOne
 import pandas as pd
 
-def table_one(cohort_number, hr_period, sf_period):
+def table_one(cohort_number, hr_period, sf_period, hr_bound):
 
     data = pd.read_csv(f'data/MIMIC_coh_{cohort_number}.csv')
 
@@ -32,21 +32,9 @@ def table_one(cohort_number, hr_period, sf_period):
     data['VP_init_offset_abs_hours'] = data['VP_init_offset_abs'] * 24
 
     # encode treatment according to elegibity window, hr_bound
-    hr_bounds  = [[0,24], [24,48], [48,72], [72,96]]
-
-    for i, hr_bound in enumerate(hr_bounds):
-
-        data[f'MV_elig{i+1}'] = data['MV_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x < hr_bound[1]) else 0)
-        data[f'RRT_elig{i+1}'] = data['RRT_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x < hr_bound[1]) else 0)
-        data[f'VP_elig{i+1}'] = data['VP_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bound[0]) & (x < hr_bound[1]) else 0)
-
-    for i in range(3):
-        data['MV_elig_day'] = data['MV_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bounds[cohort_number-1][0]) \
-                                                                                  & (x <= hr_bounds[cohort_number-1][1]) else 0)
-        data['RRT_elig_day'] = data['RRT_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bounds[cohort_number-1][0]) \
-                                                                                    & (x <= hr_bounds[cohort_number-1][1]) else 0)
-        data['VP_elig_day'] = data['VP_init_offset_abs_hours'].apply(lambda x: 1 if (x >= hr_bounds[cohort_number-1][0]) \
-                                                                                    & (x <= hr_bounds[cohort_number-1][1]) else 0)
+    data[f'MV_elig']  = data['MV_init_offset_abs_hours'].apply(lambda x:  1 if (x < hr_bound) else 0)
+    data[f'RRT_elig'] = data['RRT_init_offset_abs_hours'].apply(lambda x: 1 if (x < hr_bound) else 0)
+    data[f'VP_elig']  = data['VP_init_offset_abs_hours'].apply(lambda x:  1 if (x < hr_bound) else 0)
         
     # Encode NA as 0, if missing means 0
     cols_na = ['major_surgery', 'insulin_yes', 'transfusion_yes', 'hypertension_present',
@@ -70,6 +58,9 @@ def table_one(cohort_number, hr_period, sf_period):
         "major_surgery": [1., 0.],
         "mortality_in": [1, 0],
         "mortality_90": [1, 0],
+        "MV_elig": [1, 0],
+        "RRT_elig": [1, 0],
+        "VP_elig": [1, 0],
         "mech_vent_overall": [1, 0],
         "rrt_overall": [1, 0],
         "vasopressor_overall": [1, 0],
@@ -87,18 +78,6 @@ def table_one(cohort_number, hr_period, sf_period):
         "biliary": [1., 0.],
         "skin": [1., 0.],
     }
-
-    # add to order dict MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(5):
-        if i == 0:
-            order[f'MV_elig_day'] = [1, 0]
-            order[f'RRT_elig_day'] = [1, 0]
-            order[f'VP_elig_day'] = [1, 0]
-        
-        else:
-            order[f'MV_elig{i}'] = [1, 0]
-            order[f'RRT_elig{i}'] = [1, 0]
-            order[f'VP_elig{i}'] = [1, 0]
 
     limit = {"gender": 1,
             "adm_elective": 1,
@@ -127,23 +106,11 @@ def table_one(cohort_number, hr_period, sf_period):
             "skin": 1,
             }
     
-    # add to limit dict MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(5):
-        if i == 0:
-            limit[f'MV_elig_day'] = 1
-            limit[f'RRT_elig_day'] = 1
-            limit[f'VP_elig_day'] = 1
-        
-        else:
-            limit[f'MV_elig{i}'] = 1
-            limit[f'RRT_elig{i}'] = 1
-            limit[f'VP_elig{i}'] = 1
-
-
     categ = ['anchor_year_group', 'gender',
             'insurance', 'eng_prof',
             'adm_elective', 'major_surgery',
             'mortality_in', 'mortality_90',
+            'MV_elig', 'RRT_elig', 'VP_elig',
             'mech_vent_overall', 'rrt_overall', 'vasopressor_overall',
             'insulin_yes', 'transfusion_yes', 'fluids_overall',
             'hypertension_present', 'heart_failure_present',
@@ -152,31 +119,12 @@ def table_one(cohort_number, hr_period, sf_period):
             'pneumonia', 'uti', 'biliary', 'skin'
             ]
 
-    # add to categ list MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(5):
-        if i == 0:
-            categ.append(f'MV_elig_day')
-            categ.append(f'RRT_elig_day')
-            categ.append(f'VP_elig_day')
-        
-        else:
-            categ.append(f'MV_elig{i}')
-            categ.append(f'RRT_elig{i}')
-            categ.append(f'VP_elig{i}')
-
     nonnorm = ['admission_age', 
                'los_icu_dead', 'los_icu_surv',
                'los_hosp_dead', 'los_hosp_surv',
                'charlson_comorbidity_index',
                'SOFA_admit', 'respiratory_admit', 'coagulation_admit',
                'liver_admit', 'cardiovascular_admit', 'cns_admit', 'renal_admit',
-               f'sofa_max_{sf_period}',
-               f'respiratory_max_{sf_period}',
-               f'coagulation_max_{sf_period}',
-               f'liver_max_{sf_period}',
-               f'cardiovascular_max_{sf_period}',
-               f'cns_max_{sf_period}',
-               f'renal_max_{sf_period}',
                f'fluids_{hr_period}',
                'fluids_volume',
                'fluids_volume_norm_by_los_icu',
@@ -217,9 +165,9 @@ def table_one(cohort_number, hr_period, sf_period):
         'major_surgery': "Major Surgery",
         'insurance': "Health Insurance",
         'race_group': "Race-Ethnicity Group",
-        'MV_elig': "MV initiated in the cohort day",
-        'RRT_elig': "RRT initiated in the cohort day",
-        'VP_elig': "Vasopressor initiated in the cohort day",
+        'MV_elig': "MV initiated until the cohort day",
+        'RRT_elig': "RRT initiated until the cohort day",
+        'VP_elig': "Vasopressor initiated until the cohort day",
         'mech_vent_overall': 'Mechanical Ventilation (whole stay)',
         'rrt_overall': "RRT (whole stay)",
         'vasopressor_overall': 'Vasopressors (whole stay)',
@@ -250,14 +198,7 @@ def table_one(cohort_number, hr_period, sf_period):
         f'cardiovascular_admit': "SOFA: Cardiovascular (admission)",
         f'cns_admit': "SOFA: CNS (admission)",
         f'renal_admit': "SOFA: Renal (admission)",
-        f'sofa_max_{sf_period}': "SOFA (day)",
-        f'respiratory_max_{sf_period}': "SOFA: Respiratory (day)",
-        f'coagulation_max_{sf_period}': "SOFA: Coagulation (day)",
-        f'liver_max_{sf_period}': "SOFA: Liver (day)",
-        f'cardiovascular_max_{sf_period}': "SOFA: Cardiovascular (day)",
-        f'cns_max_{sf_period}': "SOFA: CNS (day)",
-        f'renal_max_{sf_period}': "SOFA: Renal (day)",
-        f'fluids_{hr_period}': "Fluids Volume (day)",
+        f'fluids_{hr_period}': "Fluids Volume (first 24h)",
         'fluids_volume': "Fluids Volume (whole stay)",
         'fluids_volume_norm_by_los_icu': "Fluids Volume (whole stay, normalized by ICU LOS)",
         'MV_time_abs': "MV Time (duration in the stay, hours)",
@@ -267,36 +208,24 @@ def table_one(cohort_number, hr_period, sf_period):
         'VP_init_offset_abs': "Vasopressor Initiation (offset, hours)",
         'VP_time_abs': "Vasopressor Time (duration in the stay, hours)",
         'VP_time_perc_of_stay': "Vasopressor Time (duration in the stay, % of ICU LOS)",
-        f'FiO2_mean_{hr_period}': "FiO2 (mean %)",
-        f'resp_rate_mean_{hr_period}': "Respiratory Rate (mean)",
-        f'mbp_mean_{hr_period}': "Mean Blood Pressure (mean)",
+        f'FiO2_mean_{hr_period}': "FiO2 (mean %, first 24h)",
+        f'resp_rate_mean_{hr_period}': "Respiratory Rate (mean, first 24h)",
+        f'mbp_mean_{hr_period}': "Mean Blood Pressure (mean, first 24h)",
         f'temperature_mean_{hr_period}': "Temperature (mean, first 24h)",
-        f'spo2_mean_{hr_period}': "SpO2 (%, mean)",
-        f'heart_rate_mean_{hr_period}': "Heart Rate (mean)",
-        f'po2_min_{hr_period}': "PaO2 (min)",
-        f'pco2_max_{hr_period}': "PaCO2 (max)",
-        f'ph_min_{hr_period}': "pH (min)",
-        f'glucose_max_{hr_period}': "Glucose (max)",
-        f'sodium_min_{hr_period}': "Sodium (min)",
-        f'potassium_max_{hr_period}': "Potassium (max)",
-        f'cortisol_min_{hr_period}': "Cortisol (min)",
-        f'hemoglobin_min_{hr_period}': "Hemoglobin (min)",
-        f'fibrinogen_min_{hr_period}': "Fibrinogen (min)",
-        f'inr_max_{hr_period}': "INR (max)"
+        f'spo2_mean_{hr_period}': "SpO2 (%, mean, first 24h)",
+        f'heart_rate_mean_{hr_period}': "Heart Rate (mean, first 24h)",
+        f'po2_min_{hr_period}': "PaO2 (min, first 24h)",
+        f'pco2_max_{hr_period}': "PaCO2 (max, first 24h)",
+        f'ph_min_{hr_period}': "pH (min, first 24h)",
+        f'glucose_max_{hr_period}': "Glucose (max, first 24h)",
+        f'sodium_min_{hr_period}': "Sodium (min, first 24h)",
+        f'potassium_max_{hr_period}': "Potassium (max, first 24h)",
+        f'cortisol_min_{hr_period}': "Cortisol (min, first 24h)",
+        f'hemoglobin_min_{hr_period}': "Hemoglobin (min, first 24h)",
+        f'fibrinogen_min_{hr_period}': "Fibrinogen (min, first 24h)",
+        f'inr_max_{hr_period}': "INR (max, first 24h)"
         }
     
-    # add to lbls MV_elig{i}, RRT_elig{i}, VP_elig{i}
-    for i in range(5):
-        if i == 0:
-            labls[f'MV_elig{i}'] = f"MV initiated in the cohort day"
-            labls[f'RRT_elig{i}'] = f"RRT initiated in the cohort day"
-            labls[f'VP_elig{i}'] = f"Vasopressor initiated in the cohort day"
-        else:
-            labls[f'MV_elig{i}'] = f"MV initiated in day {i}"
-            labls[f'RRT_elig{i}'] = f"RRT initiated in day {i}"
-            labls[f'VP_elig{i}'] = f"Vasopressor initiated in day {i}"
-
-
     decimals = {
         'admission_age': 0,
         'fluids_volume': 0,
@@ -332,12 +261,11 @@ def table_one(cohort_number, hr_period, sf_period):
 
 
 cohorts = [1,2,3,4]
-hr_periods = ["6_24h", "24_48h", "48_72h", "72_96h"]
-sf_periods = ["0_24h", "24_48h", "48_72h", "72_96h"]
+hr_bounds = [24, 48, 72, 96]
 
 for i in range(len(cohorts)):
     print(f"Processing cohort {cohorts[i]}...")
-    table_one(cohorts[i], hr_periods[i], sf_periods[i])
+    table_one(cohorts[i], "6_24h", "0_24h", hr_bounds[i])
 
 tables = []
 # Read all tables and merge them with a loop
@@ -353,7 +281,7 @@ for i in range(1,5):
     table = table.iloc[:, 2:]
 
     # make and header with the cohort number
-    header = pd.DataFrame([f"Day {i}"] * len(table.columns), index=table.columns).T
+    header = pd.DataFrame([f"Up to Day {i}"] * len(table.columns), index=table.columns).T
     # concatenate the header and the table
     table = pd.concat([header, table], axis=0)
 
