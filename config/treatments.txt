@@ -1,4 +1,4 @@
 treatment
-MV_elig_day
-RRT_elig_day
-VP_elig_day
+MV_elig
+RRT_elig
+VP_elig
