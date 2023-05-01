@@ -6,7 +6,7 @@ from tqdm import tqdm
 import matplotlib
 matplotlib.use('TKAgg')
 
-filename = "log_reg_all_coh_races"
+filename = "xgb_all_coh"
 
 # load data from csv file into pandas dataframe
 data = pd.read_csv(f"results/models/{filename}.csv")
