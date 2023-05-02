@@ -5,7 +5,7 @@ import shap
 from tqdm import tqdm
 from xgboost import XGBClassifier
 
-setting = "bs_all_coh"
+setting = "bs_all_coh_races"
 
 # function to calculate odds ratio
 def calc_OR(shap_values, data, feature):
