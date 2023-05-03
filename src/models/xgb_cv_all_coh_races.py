@@ -68,11 +68,11 @@ for cohort in cohorts:
                 # list to append inner ORs
                 ORs = []
 
-                # stratified k-fold cross validation
-                skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
+                # normal k-fold cross validation
+                kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
 
                 # inner loop, in each fold
-                for train_index, test_index in tqdm(skf.split(X, r)):
+                for train_index, test_index in tqdm(kf.split(X, r)):
                     X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
                     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
@@ -80,13 +80,14 @@ for cohort in cohorts:
                     model.fit(X_train, y_train)
 
                     # shap explainer
-                    explainer = shap.TreeExplainer(model, X_train)
-                    shap_values = explainer(X_train, check_additivity=False)
+                    explainer = shap.TreeExplainer(model, X_test)
+                    shap_values = explainer(X_test, check_additivity=False)
 
                     shap_values = pd.DataFrame(shap_values.values, columns=conf)
 
+                    OR_inner = calc_OR(shap_values, X_test.reset_index(drop=True), race)
                     # append OR to list
-                    ORs.append(calc_OR(shap_values, data, race))
+                    ORs.append(OR_inner)
 
                 # calculate odds ratio based on all 5 folds, append
                 odds_ratios.append(np.mean(ORs))
