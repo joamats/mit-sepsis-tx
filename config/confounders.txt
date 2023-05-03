@@ -1,7 +1,7 @@
 confounder
 admission_age
 sex_female
-race_nonwhite
+race_white
 eng_prof
 private_insurance
 anchor_year_group

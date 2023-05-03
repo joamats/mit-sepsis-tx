@@ -85,7 +85,6 @@ for cohort in cohorts:
                 # calculate odds ratios
                 odds_ratios.append(calc_OR(shap_values, sample, race))
 
-
             # calculate confidence intervals
             CI_lower = np.percentile(odds_ratios, 2.5)
             CI_upper = np.percentile(odds_ratios, 97.5)
