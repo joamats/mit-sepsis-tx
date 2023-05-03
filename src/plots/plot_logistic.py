@@ -20,7 +20,7 @@ fig, axes = plt.subplots(1, 3,
                          figsize=(8.25,3.5))
 
 fig.suptitle('Likelihood of Receiving a Treatment, per Elegibility Window')
-axes[0].set_ylabel("Odds Ratio (95% CI)\n White vs. Racial-Ethnic Group")
+axes[0].set_ylabel("Odds Ratio (95% CI)\n \n Favours REG --- Favours Whites")
 
 # create dictionary of name for each treatment group
 treatment_names = {"MV_elig": "Mechanical Ventilation",

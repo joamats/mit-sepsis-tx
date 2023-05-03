@@ -5,7 +5,7 @@ import shap
 from tqdm import tqdm
 from xgboost import XGBClassifier
 
-setting = "bs_all_coh"
+setting = "bs_all_coh_races"
 
 # function to calculate odds ratio
 def calc_OR(shap_values, data, feature):
@@ -21,7 +21,7 @@ with open("config/treatments.txt", "r") as f:
 treatments.remove("treatment")
 
 # read features from list in txt
-with open("config/confounders_race.txt", "r") as f:
+with open("config/confounders_races.txt", "r") as f:
     confounders = f.read().splitlines()
 confounders.remove("confounder")
 
