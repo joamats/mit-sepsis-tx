@@ -108,7 +108,7 @@ def clean_data(cohort_number, treatment):
 
     # Replace missing values in fluids by 0
     data['fluids'] = data['fluids'].fillna(0)
-    
+
     # replace not nan values by 1
     com_cols = ['hypertension_present', 'heart_failure_present', 'copd_present',
                 'asthma_present', 'cad_present', 'connective_disease']
@@ -125,7 +125,7 @@ def clean_data(cohort_number, treatment):
 
     for rv, rn in zip(race_vars, race_names):
         data[rv] = data['race_group'].apply(lambda x: 1 if x == rn else 
-                                                      0 if x == "White" else np.nan)
+                                                      0 if x == "White" else 0)
     
     # encode proficieny in english into dummy
     data['eng_prof'] = data['eng_prof'].apply(lambda x: 1 if x == "Proficient" else 0)
