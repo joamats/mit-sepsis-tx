@@ -121,8 +121,8 @@ def clean_data(day, hr_bound, treatment):
     for col in com_cols:
         data[col] = data[col].apply(lambda x: 0 if x != 1 else 1)
 
-    # encode race_white into dummy
-    data['race_white'] =  data['race_white'].apply(lambda x: 1 if x == "White" else 0)
+    # encode race_nonwhite into dummy
+    data['race_nonwhite'] =  data['race_white'].apply(lambda x: 0 if x == "White" else 1)
 
     # encode racial-ethnic group into dummy, with white as reference
     race_vars = ['race_black', 'race_hisp', 'race_asian', 'race_other']
@@ -141,7 +141,7 @@ def clean_data(day, hr_bound, treatment):
 
     data = data[
                 ['admission_age', 'sex_female',  'eng_prof', 'private_insurance'] + \
-                ['race_white', 'race_black', 'race_hisp', 'race_asian', 'race_other'] + \
+                ['race_nonwhite', 'race_black', 'race_hisp', 'race_asian', 'race_other'] + \
                 ['anchor_year_group', 'adm_elective', 'major_surgery'] + \
                 ['charlson_comorbidity_index'] + \
                 ['SOFA_admit', 'respiratory_admit', 'coagulation_admit','cardiovascular_admit',
