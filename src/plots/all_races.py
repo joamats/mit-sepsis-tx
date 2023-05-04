@@ -6,7 +6,7 @@ from tqdm import tqdm
 import matplotlib
 matplotlib.use('TKAgg')
 
-filename = "log_reg_all_coh_races"
+filename = "logreg_cv_all_coh_races"
 model_name = "Logistic Regression"
 
 
