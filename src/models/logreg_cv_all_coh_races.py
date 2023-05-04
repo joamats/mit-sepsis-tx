@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import shap
 from tqdm import tqdm
-import statsmodels.api as sm
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 
 setting = "logreg_cv_all_coh_races"
@@ -55,7 +55,7 @@ for cohort in cohorts:
             y = subset_data[treatment]
             r = subset_data[race]
 
-            n_rep = 10
+            n_rep = 100
             odds_ratios = []
 
             # outer loop
@@ -72,10 +72,12 @@ for cohort in cohorts:
                     X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
                     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
-                    # Fit logistic regression model
-                    logreg = sm.Logit(y_test, X_test).fit(method='bfgs')
-                    # get parameter and OR for our variable of interest
-                    param = logreg.params[race]
+                    # # Fit logistic regression model
+                    model = LogisticRegression(max_iter=10000)
+                    model.fit(X_test, y_test)
+
+                    idx = X_test.columns.get_loc(race)
+                    param = model.coef_[0][idx]
                     OR_inner = np.exp(param)
 
                     # # append OR to list

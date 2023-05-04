@@ -54,12 +54,15 @@ for cohort in cohorts:
             # select X, y
             conf = confounders + [t for t in treatments if t != treatment] + [race] 
 
-            # compute OR based on all data
+            # subset the data to get not nan values for the race
+            subset_data = data.dropna(subset=race)
+            print(f"Patients dropped: {len(data) - len(subset_data)}")
+
             X = data[conf]
             y = data[treatment]
             r = data[race]
 
-            n_rep = 10
+            n_rep = 100
             odds_ratios = []
 
             # outer loop
@@ -77,7 +80,7 @@ for cohort in cohorts:
                     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
                     model = XGBClassifier()
-                    model.fit(X_train, y_train)
+                    model.fit(X_test, y_test)
 
                     # shap explainer
                     explainer = shap.TreeExplainer(model, X_test)

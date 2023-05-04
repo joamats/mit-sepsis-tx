@@ -44,7 +44,7 @@ for cohort in cohorts:
             y = data[treatment]
             r = data[race]
 
-            n_rep = 10
+            n_rep = 100
             odds_ratios = []
 
             # outer loop
