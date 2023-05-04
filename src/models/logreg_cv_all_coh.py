@@ -2,18 +2,10 @@ import pandas as pd
 import numpy as np
 import shap
 from tqdm import tqdm
-from xgboost import XGBClassifier
+import statsmodels.api as sm
 from sklearn.model_selection import StratifiedKFold
 
-setting = "cv_all_coh"
-
-# function to calculate odds ratio
-def calc_OR(shap_values, data, feature):
-    control_group = shap_values[(data[feature] == 0)].mean()
-    study_group   = shap_values[(data[feature] == 1)].mean()
-
-    return np.exp(study_group[feature]) / np.exp(control_group[feature])
-
+setting = "logreg_cv_all_coh"
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:
@@ -68,17 +60,13 @@ for cohort in cohorts:
                     X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
                     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
-                    model = XGBClassifier()
-                    model.fit(X_test, y_test)
+                    # Fit logistic regression model
+                    logreg = sm.Logit(y_test, X_test).fit(method='bfgs')
+                    # get parameter and OR for our variable of interest
+                    param = logreg.params[race]
+                    OR_inner = np.exp(param)
 
-                    # shap explainer
-                    explainer = shap.TreeExplainer(model, X_test)
-                    shap_values = explainer(X_test, check_additivity=False)
-
-                    shap_values = pd.DataFrame(shap_values.values, columns=conf)
-
-                    OR_inner = calc_OR(shap_values, X_test.reset_index(drop=True), race)
-                    # append OR to list
+                    # # append OR to list
                     ORs.append(OR_inner)
 
                     print(f"OR: {OR_inner:.5f}")
@@ -101,4 +89,4 @@ for cohort in cohorts:
                                             "2.5%": CI_lower,
                                             "97.5%": CI_upper}, ignore_index=True)
             # save results as we go
-            results_df.to_csv(f"results/models/xgb_{setting}.csv", index=False)
+            results_df.to_csv(f"results/models/{setting}.csv", index=False)

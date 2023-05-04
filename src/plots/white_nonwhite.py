@@ -18,7 +18,7 @@ treatment_groups = data.groupby("treatment")
 # Set the figure and axes
 fig, axes = plt.subplots(1, 3,
                          sharex=True, sharey=True,
-                         figsize=(8.25,3.5))
+                         figsize=(9,3.5))
 
 fig.suptitle(f'{model_name} Model: Likelihood of Treatment Initiation')
 

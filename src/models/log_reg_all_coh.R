@@ -49,6 +49,3 @@ for (cohort_number in cohort_numbers) {
     }
 }
 
-
-
-
