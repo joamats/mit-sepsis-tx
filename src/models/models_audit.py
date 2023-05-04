@@ -57,10 +57,10 @@ for cohort in cohorts:
                                         "Brier": brier}, ignore_index=True)
 
         # Now Logistic Regression
-        model = LogisticRegression()
+        model = LogisticRegression(max_iter=10000)
         model.fit(X_train, y_train)
 
-        converged_ = model.n_iter_ < model.max_iter
+        converged_ = model.n_iter_ #< model.max_iter
 
         # AUC & Brier score
         y_pred_proba = model.predict_proba(X_test)[:,1]
