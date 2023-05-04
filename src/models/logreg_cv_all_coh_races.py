@@ -66,7 +66,7 @@ for cohort in cohorts:
 
                 # normal k-fold cross validation
                 kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
-
+            
                 # inner loop, in each fold
                 for train_index, test_index in tqdm(kf.split(X, r)):
                     X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
