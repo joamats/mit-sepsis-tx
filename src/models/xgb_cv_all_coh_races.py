@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
-import shap
 from tqdm import tqdm
+import shap
 from xgboost import XGBClassifier
 from sklearn.model_selection import StratifiedKFold
 
-setting = "cv_all_coh_races"
+setting = "xgb_cv_all_coh_races"
 
 # function to calculate odds ratio
 def calc_OR(shap_values, data, feature):
@@ -58,9 +58,9 @@ for cohort in cohorts:
             subset_data = data.dropna(subset=race)
             print(f"Patients dropped: {len(data) - len(subset_data)}")
 
-            X = data[conf]
-            y = data[treatment]
-            r = data[race]
+            X = subset_data[conf]
+            y = subset_data[treatment]
+            r = subset_data[race]
 
             n_rep = 100
             odds_ratios = []
@@ -110,4 +110,4 @@ for cohort in cohorts:
                                             "2.5%": CI_lower,
                                             "97.5%": CI_upper}, ignore_index=True)
             # save results as we go
-            results_df.to_csv(f"results/models/xgb_{setting}.csv", index=False)
+            results_df.to_csv(f"results/models/{setting}.csv", index=False)

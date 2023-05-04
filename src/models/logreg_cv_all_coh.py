@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
-import shap
 from tqdm import tqdm
-import statsmodels.api as sm
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 
