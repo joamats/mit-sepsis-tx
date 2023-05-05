@@ -616,6 +616,12 @@ SELECT
   , lab_day1.inr_max AS inr_max_6_24h
   , labs_24h.cortisol_min AS cortisol_min_6_24h
   , labs_24h.hemoglobin_min AS hemoglobin_min_6_24h
+-- sens. analyses
+  , bg_art_day1.pco2_min AS pco2_min_6_24h
+  , lab_day1.potassium_min AS potassium_min_6_24h
+  , bg_day1.ph_max AS ph_max_6_24h
+  , bg_day1.bicarbonate_max AS bicarbonate_max_6_24h
+  , bg_day1.lactate_min AS lactate_min_6_24h
 
 -- lab values - day 2
   , bg_art_day2.po2_min AS po2_min_24_48h
@@ -629,6 +635,12 @@ SELECT
   , lab_day2.inr_max AS inr_max_24_48h
   , labs_48h.cortisol_min AS cortisol_min_24_48h
   , labs_48h.hemoglobin_min AS hemoglobin_min_24_48h
+-- sens. analyses
+  , bg_art_day2.pco2_min AS pco2_min_24_48h
+  , lab_day2.potassium_min AS potassium_min_24_48h
+  , bg_day2.ph_max AS ph_max_24_48h
+  , bg_day2.bicarbonate_max AS bicarbonate_max_24_48h
+  , bg_day2.lactate_min AS lactate_min_24_48h
 
 -- lab values - day 3
   , bg_art_day3.po2_min AS po2_min_48_72h
@@ -642,6 +654,12 @@ SELECT
   , lab_day3.inr_max AS inr_max_48_72h
   , labs_72h.cortisol_min AS cortisol_min_48_72h
   , labs_72h.hemoglobin_min AS hemoglobin_min_48_72h
+-- sens. analyses
+  , bg_art_day3.pco2_min AS pco2_min_48_72h
+  , lab_day3.potassium_min AS potassium_min_48_72h
+  , bg_day3.ph_max AS ph_max_48_72h
+  , bg_day3.bicarbonate_max AS bicarbonate_max_48_72h
+  , bg_day3.lactate_min AS lactate_min_48_72h
 
 -- lab values - day 4
   , bg_art_day4.po2_min AS po2_min_72_96h
@@ -655,6 +673,12 @@ SELECT
   , lab_day4.inr_max AS inr_max_72_96h
   , labs_96h.cortisol_min AS cortisol_min_72_96h
   , labs_96h.hemoglobin_min AS hemoglobin_min_72_96h
+-- sens. analyses
+  , bg_art_day4.pco2_min AS pco2_min_72_96h
+  , lab_day4.potassium_min AS potassium_min_72_96h
+  , bg_day4.ph_max AS ph_max_72_96h
+  , bg_day4.bicarbonate_max AS bicarbonate_max_72_96h
+  , bg_day4.lactate_min AS lactate_min_72_96h
 
 -- comorbidites
   , hypertension_present

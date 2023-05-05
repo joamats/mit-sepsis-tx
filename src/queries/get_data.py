@@ -59,9 +59,9 @@ def main(args):
     # Set up BigQuery client using default SDK credentials
     client = bigquery.Client(project=project_id)
     # create the aux dataset
-    # create_aux_dataset(client, project_id)
+    create_aux_dataset(client, project_id)
     # create the aux tables
-    # create_aux_tables(client, project_id)
+    create_aux_tables(client, project_id)
     # create the main table
     create_main_table(client, project_id, args.destination)
 
