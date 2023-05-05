@@ -4,7 +4,7 @@ from tqdm import tqdm
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 
-setting = "logreg_cv_all_coh_races"
+setting = "logreg_cv_all_coh"
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:
@@ -12,7 +12,7 @@ with open("config/treatments.txt", "r") as f:
 treatments.remove("treatment")
 
 # read features from list in txt
-with open("config/confounders_races.txt", "r") as f:
+with open("config/confounders.txt", "r") as f:
     confounders = f.read().splitlines()
 confounders.remove("confounder")
 
@@ -20,7 +20,7 @@ confounders.remove("confounder")
 results_df = pd.DataFrame(columns=["cohort","race","treatment","OR","2.5%","97.5%"])
 
 cohorts = [1,2,3,4]
-races = ['race_black', 'race_hisp', 'race_asian']
+races = ['race_nonwhite']
 
 for cohort in cohorts:
     print(f"Cohort: {cohort}")
@@ -30,29 +30,17 @@ for cohort in cohorts:
         # load data
         data = pd.read_csv(f"data/sens/clean/coh_{cohort}_{treatment[:-5]}.csv")
 
-        # append results to dataframe
-        results_df = results_df.append({"cohort": cohort,
-                                "race": "race_white",
-                                "treatment": treatment,
-                                "OR": 1,
-                                "2.5%": 1,
-                                "97.5%": 1}, ignore_index=True)
-
         for race in races:
             print(f"Race-Ethnicity: {race}")
 
             # append treatments that are not the current one to confounders
             # select X, y
-            conf = confounders + [t for t in treatments if t != treatment] + [race] 
-
-            # subset the data to get not nan values for the race
-            subset_data = data.dropna(subset=race)
-            print(f"Patients dropped: {len(data) - len(subset_data)}")
+            conf = confounders + [t for t in treatments if t != treatment] 
 
             # compute OR based on all data
-            X = subset_data[conf]
-            y = subset_data[treatment]
-            r = subset_data[race]
+            X = data[conf]
+            y = data[treatment]
+            r = data[race]
 
             n_rep = 100
             odds_ratios = []
@@ -65,7 +53,7 @@ for cohort in cohorts:
 
                 # normal k-fold cross validation
                 kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
-            
+
                 # inner loop, in each fold
                 for train_index, test_index in tqdm(kf.split(X, r)):
                     X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]

@@ -1,10 +1,19 @@
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from sklearn.linear_model import LogisticRegression
+import shap
+from xgboost import XGBClassifier
 from sklearn.model_selection import StratifiedKFold
 
-setting = "logreg_cv_all_coh_races"
+setting = "xgb_cv_all_coh_races"
+
+# function to calculate odds ratio
+def calc_OR(shap_values, data, feature):
+    control_group = shap_values[(data[feature] == 0)].mean()
+    study_group   = shap_values[(data[feature] == 1)].mean()
+
+    return np.exp(study_group[feature]) / np.exp(control_group[feature])
+
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:
@@ -49,7 +58,6 @@ for cohort in cohorts:
             subset_data = data.dropna(subset=race)
             print(f"Patients dropped: {len(data) - len(subset_data)}")
 
-            # compute OR based on all data
             X = subset_data[conf]
             y = subset_data[treatment]
             r = subset_data[race]
@@ -65,24 +73,24 @@ for cohort in cohorts:
 
                 # normal k-fold cross validation
                 kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
-            
+
                 # inner loop, in each fold
                 for train_index, test_index in tqdm(kf.split(X, r)):
                     X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
                     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
-                    # # Fit logistic regression model
-                    model = LogisticRegression(max_iter=10000)
+                    model = XGBClassifier()
                     model.fit(X_test, y_test)
 
-                    idx = X_test.columns.get_loc(race)
-                    param = model.coef_[0][idx]
-                    OR_inner = np.exp(param)
+                    # shap explainer
+                    explainer = shap.TreeExplainer(model, X_test)
+                    shap_values = explainer(X_test, check_additivity=False)
 
-                    # # append OR to list
+                    shap_values = pd.DataFrame(shap_values.values, columns=conf)
+
+                    OR_inner = calc_OR(shap_values, X_test.reset_index(drop=True), race)
+                    # append OR to list
                     ORs.append(OR_inner)
-
-                    print(f"OR: {OR_inner:.5f}")
 
                 # calculate odds ratio based on all 5 folds, append
                 odds_ratios.append(np.mean(ORs))
