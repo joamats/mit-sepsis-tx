@@ -163,6 +163,129 @@ WITH
     AND TIMESTAMP_DIFF(ce.starttime, icu.admittime, MINUTE) >  3*1440
     GROUP BY stay_id
 )
+
+-- auxiliary tables for urine outputs across 24h, 48h, 72h, 96h
+
+, uo_24h AS (
+    SELECT
+      uor.stay_id
+    , MAX(urineoutput_24hr) AS uo_6_24h
+    
+    FROM  `physionet-data.mimiciv_derived.urine_output_rate`  AS uor
+
+    LEFT JOIN `protean-chassis-368116.mimiciv_derived.icustay_detail` icu
+    ON icu.stay_id = uor.stay_id
+
+    WHERE urineoutput_24hr is NOT NULL
+    AND icu.los_icu > 0
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) <= 1440 
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) >= 360
+    GROUP BY stay_id
+)
+
+, uo_48h AS (
+    SELECT
+      uor.stay_id
+    , MAX(urineoutput_24hr) AS uo_24_48h
+
+    FROM  `physionet-data.mimiciv_derived.urine_output_rate`  AS uor
+
+    LEFT JOIN `protean-chassis-368116.mimiciv_derived.icustay_detail` icu
+    ON icu.stay_id = uor.stay_id
+
+    WHERE urineoutput_24hr is NOT NULL
+    AND icu.los_icu > 0
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) <= 2*1440 
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) >  1440
+    GROUP BY stay_id
+)
+
+, uo_72h AS (
+    SELECT
+      uor.stay_id
+    , MAX(urineoutput_24hr) AS uo_48_72h
+
+    FROM  `physionet-data.mimiciv_derived.urine_output_rate`  AS uor
+
+    LEFT JOIN `protean-chassis-368116.mimiciv_derived.icustay_detail` icu
+    ON icu.stay_id = uor.stay_id
+
+    WHERE urineoutput_24hr is NOT NULL
+    AND icu.los_icu > 0
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) <= 3*1440 
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) >  2*1440
+    GROUP BY stay_id
+)
+
+, uo_96h AS (
+    SELECT
+      uor.stay_id
+    , MAX(urineoutput_24hr) AS uo_72_96h
+
+    FROM  `physionet-data.mimiciv_derived.urine_output_rate`  AS uor
+
+    LEFT JOIN `protean-chassis-368116.mimiciv_derived.icustay_detail` icu
+    ON icu.stay_id = uor.stay_id
+
+    WHERE urineoutput_24hr is NOT NULL
+    AND icu.los_icu > 0
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) <= 4*1440 
+    AND TIMESTAMP_DIFF(uor.charttime, icu.admittime, MINUTE) >  3*1440
+    GROUP BY stay_id
+)
+
+, pf_24h AS (
+    SELECT
+      sf.stay_id
+    , AVG(pao2fio2ratio_novent) AS pf_6_24h
+
+    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
+
+    WHERE pao2fio2ratio_novent is NOT NULL
+    AND hr >= 0 
+    AND hr <=24
+    GROUP BY stay_id
+)
+
+, pf_48h AS (
+    SELECT
+      sf.stay_id
+    , AVG(pao2fio2ratio_novent) AS pf_24_48h
+
+    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
+
+    WHERE pao2fio2ratio_novent is NOT NULL
+    AND hr >= 24
+    AND hr <= 48
+    GROUP BY stay_id
+)
+
+, pf_72h AS (
+    SELECT
+      sf.stay_id
+    , AVG(pao2fio2ratio_novent) AS pf_48_72h
+
+    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
+
+    WHERE pao2fio2ratio_novent is NOT NULL
+    AND hr >= 48
+    AND hr <= 72
+    GROUP BY stay_id
+)
+
+, pf_96h AS (
+    SELECT
+      sf.stay_id
+    , AVG(pao2fio2ratio_novent) AS pf_72_96h
+
+    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
+
+    WHERE pao2fio2ratio_novent is NOT NULL
+    AND hr >= 72
+    AND hr <= 96
+    GROUP BY stay_id
+)
+
 -- auxiliary table for labs, custom because are not in the derived ones!
 , labs_24h AS (
   SELECT lab.hadm_id,
@@ -355,6 +478,12 @@ SELECT
   , sofa4.cns_24hours             AS cns_max_72_96h
   , sofa4.renal_24hours           AS renal_max_72_96h
 
+-- po2_fio2_ratio - per day
+  , pf_24h.pf_6_24h
+  , pf_48h.pf_24_48h
+  , pf_72h.pf_48_72h
+  , pf_96h.pf_72_96h
+
 -- FiO2 per day
   , fio2_24h.FiO2_mean_6_24h
   , fio2_48h.FiO2_mean_24_48h
@@ -366,6 +495,12 @@ SELECT
   , fluids_48h.fluids_24_48h
   , fluids_72h.fluids_48_72h
   , fluids_96h.fluids_72_96h
+
+-- urine volumes - per day
+  , uo_24h.uo_6_24h
+  , uo_48h.uo_24_48h
+  , uo_72h.uo_48_72h
+  , uo_96h.uo_72_96h
 
 -- treatments - overall
   , fluids_volume
@@ -840,6 +975,26 @@ LEFT JOIN fluids_72h
 ON fluids_72h.stay_id = icu.stay_id
 LEFT JOIN fluids_96h
 ON fluids_96h.stay_id = icu.stay_id
+
+-- Add urine output per day
+LEFT JOIN uo_24h
+ON uo_24h.stay_id = icu.stay_id
+LEFT JOIN uo_48h
+ON uo_48h.stay_id = icu.stay_id
+LEFT JOIN uo_72h
+ON uo_72h.stay_id = icu.stay_id
+LEFT JOIN uo_96h
+ON uo_96h.stay_id = icu.stay_id
+
+-- Add po2_fio2_ratio per day
+LEFT JOIN pf_24h
+ON pf_24h.stay_id = icu.stay_id
+LEFT JOIN pf_48h
+ON pf_48h.stay_id = icu.stay_id
+LEFT JOIN pf_72h
+ON pf_72h.stay_id = icu.stay_id
+LEFT JOIN pf_96h
+ON pf_96h.stay_id = icu.stay_id
 
 -- Add FiO2 per day
 LEFT JOIN fio2_24h
