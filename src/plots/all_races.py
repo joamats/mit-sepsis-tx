@@ -77,7 +77,6 @@ def plot_results(filename, model_name):
     fig.supylabel('Elegibility Window (days)\n')
     plt.tight_layout()
 
-
     # Save the figure
     fig.savefig(f"results/plots/{filename}.png", dpi=300, bbox_inches="tight")
 
