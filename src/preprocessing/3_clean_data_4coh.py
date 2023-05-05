@@ -117,7 +117,7 @@ def clean_data(cohort_number, treatment):
         data[col] = data[col].apply(lambda x: 0 if x != 1 else 1)
 
     # encode race_white into dummy
-    data['race_white'] =  data['race_white'].apply(lambda x: 1 if x == "White" else 0)
+    data['race_nonwhite'] =  data['race_white'].apply(lambda x: 0 if x == "White" else 1)
 
     # encode racial-ethnic group into dummy, with white as reference
     race_vars = ['race_black', 'race_hisp', 'race_asian', 'race_other']
