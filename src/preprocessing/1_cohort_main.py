@@ -24,12 +24,13 @@ print(f"Removed {len(df2) - len(df3)} patients with no race information or other
 demo3 = print_demo(get_demography(df3))
 print(f"{len(df3)} ICU stays with sepsis, full code, and race known \n({demo3})\n")
 
-# # Remove patients with LoS > 30 days
-# df4 = df3[df3.los_icu <= 30]
-# print(f"Removed {len(df3) - len(df4)} stays with LoS > 30 days")
-# demo4 = print_demo(get_demography(df4))
-# print(f"{len(df4)} stays with sepsis, full code, known race, and 1 day <= ICU LoS <= 30 days \n({demo4})\n")
-df4 = df3
+# Remove patients with CKD stage > 3
+df3.ckd_stages = df3.ckd_stages.fillna(0)
+df4 = df3[(df3.ckd_stages <= 3)]
+print(f"Removed {len(df3) - len(df4)} stays with CKD stage > 3")
+demo4 = print_demo(get_demography(df4))
+print(f"{len(df4)} stays with sepsis, full code, known race, and 1 day <= ICU LoS, and no CKD stage >3 \n({demo4})\n")
+
 
 # Create 4 new cohorts, iterating, removing patients with LoS < 2 day , 3 days, 4 days, 5 days
 for los_min in range(2, 6):

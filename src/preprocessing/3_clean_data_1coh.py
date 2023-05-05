@@ -141,7 +141,7 @@ def clean_data(day, hr_bound, treatment):
 
     data = data[
                 ['admission_age', 'sex_female',  'eng_prof', 'private_insurance'] + \
-                ['race_white', 'race_black', 'race_hisp', 'race_asian', 'race_other'] + \
+                ['race_nonwhite', 'race_black', 'race_hisp', 'race_asian', 'race_other'] + \
                 ['anchor_year_group', 'adm_elective', 'major_surgery'] + \
                 ['charlson_comorbidity_index'] + \
                 ['SOFA_admit', 'respiratory_admit', 'coagulation_admit','cardiovascular_admit',
