@@ -37,7 +37,7 @@ for cohort in cohorts:
     for treatment in treatments:
         print(f"Treatment: {treatment}")
         # load data
-        data = pd.read_csv(f"data/sens/clean/coh_{cohort}_{treatment[:-5]}.csv")
+        data = pd.read_csv(f"data/clean/coh_{cohort}_{treatment[:-5]}.csv")
 
         for race in races:
             print(f"Race-Ethnicity: {race}")
@@ -101,4 +101,4 @@ for cohort in cohorts:
                                             "2.5%": CI_lower,
                                             "97.5%": CI_upper}, ignore_index=True)
             # save results as we go
-            results_df.to_csv(f"results/models/sens/{setting}.csv", index=False)
+            results_df.to_csv(f"results/models/{setting}.csv", index=False)
