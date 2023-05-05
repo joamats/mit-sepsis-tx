@@ -4,6 +4,7 @@ import os
 from utils import get_demography, print_demo
 
 df0 = pd.read_csv('data/MIMIC_data.csv')
+df0.ckd_stages = df0.ckd_stages.fillna(0)
 print(f"\n{len(df0)} stays in the ICU")
 
 # Remove patients without sepsis
@@ -25,7 +26,6 @@ demo3 = print_demo(get_demography(df3))
 print(f"{len(df3)} ICU stays with sepsis, full code, and race known \n({demo3})\n")
 
 # Remove patients with CKD stage > 3
-df3.ckd_stages = df3.ckd_stages.fillna(0)
 df4 = df3[(df3.ckd_stages <= 3)]
 print(f"Removed {len(df3) - len(df4)} stays with CKD stage > 3")
 demo4 = print_demo(get_demography(df4))
@@ -39,7 +39,7 @@ for los_min in range(2, 6):
     df5 = df4[df4.los_icu >= los_min]
     print(f"Removed {len(df4) - len(df5)} stays with LoS < {los_min} days")
     demo5 = print_demo(get_demography(df5))
-    print(f"{len(df5)} stays with sepsis, {los_min} days <= ICU LoS <= 30 days \n({demo5})\n")
+    print(f"{len(df5)} stays with sepsis, {los_min} days <= ICU LoS \n({demo5})\n")
 
     # Remove patients with recurrent stays
     df6 = df5.sort_values(by=["subject_id", "hadm_id", "hospstay_seq","icustay_seq"], ascending=True) \
@@ -48,7 +48,7 @@ for los_min in range(2, 6):
 
     print(f"Removed {len(df5) - len(df6)} recurrent stays")
     demo6 = print_demo(get_demography(df6))
-    print(f"{len(df6)} stays with sepsis, {los_min} day <= ICU LoS <= 30 days, full code, race known \n({demo6})\n")
+    print(f"{len(df6)} stays with sepsis, {los_min} day <= ICU LoS , full code, race known \n({demo6})\n")
 
     df6.to_csv(f'data/MIMIC_coh_{los_min-1}.csv')
     
