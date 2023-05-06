@@ -15,7 +15,7 @@ print(f"{len(df1)} sepsis stays \n({demo1})\n")
 
 # Remove patiens without Full Code
 df2 = df1[df1.is_full_code_admission == 1]
-print(f"Removed {len(df1) - len(df2)} stays without Full Code (admission and discharge)")
+print(f"Removed {len(df1) - len(df2)} stays without Full Code (admission)")
 demo2 = print_demo(get_demography(df2))
 print(f"{len(df2)} stays with sepsis and Full Code \n({demo2})\n")
 
