@@ -4,7 +4,7 @@ from tqdm import tqdm
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 
-setting = "logreg_cv_all_coh_races"
+setting = "sens/logreg_cv_all_coh_races"
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:
@@ -102,4 +102,4 @@ for cohort in cohorts:
                                             "2.5%": CI_lower,
                                             "97.5%": CI_upper}, ignore_index=True)
             # save results as we go
-            results_df.to_csv(f"results/models/sens/{setting}.csv", index=False)
+            results_df.to_csv(f"results/models/{setting}.csv", index=False)

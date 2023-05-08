@@ -1,19 +1,31 @@
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import shap
-from xgboost import XGBClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
+from joblib import Parallel, delayed
+import multiprocessing
 
-setting = "sens/xgb_cv_all_coh_races"
+# Set number of processes to run in parallel
+num_processes = 5
 
-# function to calculate odds ratio
-def calc_OR(shap_values, data, feature):
-    control_group = shap_values[(data[feature] == 0)].mean()
-    study_group   = shap_values[(data[feature] == 1)].mean()
+# Function to train the logistic regression model and calculate OR for a fold
+def train_model(train_index, test_index):
+    _, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
+    _, y_test = y.iloc[train_index], y.iloc[test_index]
 
-    return np.exp(study_group[feature]) / np.exp(control_group[feature])
+    # Fit logistic regression model
+    model = LogisticRegression(max_iter=10000)
+    model.fit(X_test, y_test)
 
+    idx = X_test.columns.get_loc(race)
+    param = model.coef_[0][idx]
+    OR_inner = np.exp(param)
+
+    return OR_inner
+
+
+setting = "sens/logreg_cv_all_coh_races"
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:
@@ -58,6 +70,7 @@ for cohort in cohorts:
             subset_data = data.dropna(subset=race)
             print(f"Patients dropped: {len(data) - len(subset_data)}")
 
+            # compute OR based on all data
             X = subset_data[conf]
             y = subset_data[treatment]
             r = subset_data[race]
@@ -68,32 +81,18 @@ for cohort in cohorts:
             # outer loop
             for i in tqdm(range(n_rep)):
 
-                # list to append inner ORs
-                ORs = []
-
                 # normal k-fold cross validation
                 kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
+            
+                # Inner loop, in each fold, running in parallel
+                ORs = Parallel(n_jobs=num_processes)(
+                    delayed(train_model)(train_index, test_index)
+                    for train_index, test_index in tqdm(kf.split(X, r))
+                )
 
-                # inner loop, in each fold
-                for train_index, test_index in tqdm(kf.split(X, r)):
-                    X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
-                    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-
-                    model = XGBClassifier()
-                    model.fit(X_test, y_test)
-
-                    # shap explainer
-                    explainer = shap.TreeExplainer(model, X_test)
-                    shap_values = explainer(X_test, check_additivity=False)
-
-                    shap_values = pd.DataFrame(shap_values.values, columns=conf)
-
-                    OR_inner = calc_OR(shap_values, X_test.reset_index(drop=True), race)
-                    # append OR to list
-                    ORs.append(OR_inner)
-
-                # calculate odds ratio based on all 5 folds, append
-                odds_ratios.append(np.mean(ORs))
+                # Calculate odds ratio based on all 5 folds
+                odds_ratio = np.mean(ORs)
+                odds_ratios.append(odds_ratio)
 
             # calculate confidence intervals
             CI_lower = np.percentile(odds_ratios, 2.5)

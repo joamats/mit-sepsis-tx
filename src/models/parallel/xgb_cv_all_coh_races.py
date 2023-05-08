@@ -4,6 +4,29 @@ from tqdm import tqdm
 import shap
 from xgboost import XGBClassifier
 from sklearn.model_selection import StratifiedKFold
+from joblib import Parallel, delayed
+import multiprocessing
+
+# Number of parallel processes
+num_processes = 5
+
+# Function to train the XGBoost model, calculate SHAP values, and calculate OR for a fold
+def train_model(train_index, test_index):
+    _, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
+    _, y_test = y.iloc[train_index], y.iloc[test_index]
+
+    model = XGBClassifier()
+    model.fit(X_test, y_test)
+
+    # SHAP explainer
+    explainer = shap.TreeExplainer(model, X_test)
+    shap_values = explainer(X_test, check_additivity=False)
+
+    shap_values = pd.DataFrame(shap_values.values, columns=conf)
+
+    OR_inner = calc_OR(shap_values, X_test.reset_index(drop=True), race)
+
+    return OR_inner
 
 setting = "sens/xgb_cv_all_coh_races"
 
@@ -68,32 +91,18 @@ for cohort in cohorts:
             # outer loop
             for i in tqdm(range(n_rep)):
 
-                # list to append inner ORs
-                ORs = []
-
                 # normal k-fold cross validation
                 kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
 
-                # inner loop, in each fold
-                for train_index, test_index in tqdm(kf.split(X, r)):
-                    X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
-                    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+                # Inner loop, in each fold, running in parallel
+                ORs = Parallel(n_jobs=num_processes)(
+                    delayed(train_model)(train_index, test_index)
+                    for train_index, test_index in tqdm(kf.split(X, r))
+                )
 
-                    model = XGBClassifier()
-                    model.fit(X_test, y_test)
-
-                    # shap explainer
-                    explainer = shap.TreeExplainer(model, X_test)
-                    shap_values = explainer(X_test, check_additivity=False)
-
-                    shap_values = pd.DataFrame(shap_values.values, columns=conf)
-
-                    OR_inner = calc_OR(shap_values, X_test.reset_index(drop=True), race)
-                    # append OR to list
-                    ORs.append(OR_inner)
-
-                # calculate odds ratio based on all 5 folds, append
-                odds_ratios.append(np.mean(ORs))
+                # Calculate odds ratio based on all 5 folds
+                odds_ratio = np.mean(ORs)
+                odds_ratios.append(odds_ratio)
 
             # calculate confidence intervals
             CI_lower = np.percentile(odds_ratios, 2.5)
