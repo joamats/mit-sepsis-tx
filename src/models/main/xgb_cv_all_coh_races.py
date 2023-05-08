@@ -31,10 +31,10 @@ results_df = pd.DataFrame(columns=["cohort","race","treatment","OR","2.5%","97.5
 cohorts = [1,2,3,4]
 races = ['race_black', 'race_hisp', 'race_asian']
 
-for cohort in cohorts:
+for cohort in cohorts[::-1]:
     print(f"Cohort: {cohort}")
 
-    for treatment in treatments:
+    for treatment in treatments[::-1]:
         print(f"Treatment: {treatment}")
         # load data
         data = pd.read_csv(f"data/clean/coh_{cohort}_{treatment[:-5]}.csv")
@@ -47,7 +47,7 @@ for cohort in cohorts:
                                 "2.5%": 1,
                                 "97.5%": 1}, ignore_index=True)
 
-        for race in races:
+        for race in races[::-1]:
             print(f"Race-Ethnicity: {race}")
 
             # append treatments that are not the current one to confounders

@@ -478,12 +478,6 @@ SELECT
   , sofa4.cns_24hours             AS cns_max_72_96h
   , sofa4.renal_24hours           AS renal_max_72_96h
 
--- po2_fio2_ratio - per day
-  , pf_24h.pf_6_24h
-  , pf_48h.pf_24_48h
-  , pf_72h.pf_48_72h
-  , pf_96h.pf_72_96h
-
 -- FiO2 per day
   , fio2_24h.FiO2_mean_6_24h
   , fio2_48h.FiO2_mean_24_48h
@@ -622,6 +616,7 @@ SELECT
   , bg_day1.ph_max AS ph_max_6_24h
   , bg_day1.bicarbonate_max AS bicarbonate_max_6_24h
   , bg_day1.lactate_min AS lactate_min_6_24h
+  , bg_day1.pao2fio2ratio_avg AS pf_6_24h
 
 -- lab values - day 2
   , bg_art_day2.po2_min AS po2_min_24_48h
@@ -641,6 +636,7 @@ SELECT
   , bg_day2.ph_max AS ph_max_24_48h
   , bg_day2.bicarbonate_max AS bicarbonate_max_24_48h
   , bg_day2.lactate_min AS lactate_min_24_48h
+  , bg_day2.pao2fio2ratio_avg AS pf_24_48h
 
 -- lab values - day 3
   , bg_art_day3.po2_min AS po2_min_48_72h
@@ -660,6 +656,7 @@ SELECT
   , bg_day3.ph_max AS ph_max_48_72h
   , bg_day3.bicarbonate_max AS bicarbonate_max_48_72h
   , bg_day3.lactate_min AS lactate_min_48_72h
+  , bg_day3.pao2fio2ratio_avg AS pf_48_72h
 
 -- lab values - day 4
   , bg_art_day4.po2_min AS po2_min_72_96h
@@ -679,6 +676,7 @@ SELECT
   , bg_day4.ph_max AS ph_max_72_96h
   , bg_day4.bicarbonate_max AS bicarbonate_max_72_96h
   , bg_day4.lactate_min AS lactate_min_72_96h
+  , bg_day4.pao2fio2ratio_avg AS pf_72_96h
 
 -- comorbidites
   , hypertension_present

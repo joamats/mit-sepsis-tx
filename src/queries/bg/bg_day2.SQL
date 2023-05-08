@@ -15,6 +15,7 @@ SELECT
     , MIN(aado2_calc) AS aado2_calc_min, MAX(aado2_calc) AS aado2_calc_max
     , MIN(pao2fio2ratio) AS pao2fio2ratio_min
     , MAX(pao2fio2ratio) AS pao2fio2ratio_max
+    , AVG(pao2fio2ratio) AS pao2fio2ratio_avg
     , MIN(baseexcess) AS baseexcess_min, MAX(baseexcess) AS baseexcess_max
     , MIN(bicarbonate) AS bicarbonate_min, MAX(bicarbonate) AS bicarbonate_max
     , MIN(totalco2) AS totalco2_min, MAX(totalco2) AS totalco2_max
