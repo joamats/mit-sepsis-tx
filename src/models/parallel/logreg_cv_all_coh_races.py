@@ -4,7 +4,8 @@ from tqdm import tqdm
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from joblib import Parallel, delayed
-import multiprocessing
+
+setting = "sens/logreg_cv_all_coh_races"
 
 # Set number of processes to run in parallel
 num_processes = 5
@@ -23,9 +24,6 @@ def train_model(train_index, test_index):
     OR_inner = np.exp(param)
 
     return OR_inner
-
-
-setting = "sens/logreg_cv_all_coh_races"
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:

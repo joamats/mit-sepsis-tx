@@ -5,7 +5,8 @@ import shap
 from xgboost import XGBClassifier
 from sklearn.model_selection import StratifiedKFold
 from joblib import Parallel, delayed
-import multiprocessing
+
+setting = "sens/xgb_cv_all_coh_races"
 
 # Number of parallel processes
 num_processes = 5
@@ -28,15 +29,12 @@ def train_model(train_index, test_index):
 
     return OR_inner
 
-setting = "sens/xgb_cv_all_coh_races"
-
 # function to calculate odds ratio
 def calc_OR(shap_values, data, feature):
     control_group = shap_values[(data[feature] == 0)].mean()
     study_group   = shap_values[(data[feature] == 1)].mean()
 
     return np.exp(study_group[feature]) / np.exp(control_group[feature])
-
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:
