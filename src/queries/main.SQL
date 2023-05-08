@@ -234,58 +234,6 @@ WITH
     GROUP BY stay_id
 )
 
-, pf_24h AS (
-    SELECT
-      sf.stay_id
-    , AVG(pao2fio2ratio_novent) AS pf_6_24h
-
-    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
-
-    WHERE pao2fio2ratio_novent is NOT NULL
-    AND hr >= 0 
-    AND hr <=24
-    GROUP BY stay_id
-)
-
-, pf_48h AS (
-    SELECT
-      sf.stay_id
-    , AVG(pao2fio2ratio_novent) AS pf_24_48h
-
-    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
-
-    WHERE pao2fio2ratio_novent is NOT NULL
-    AND hr >= 24
-    AND hr <= 48
-    GROUP BY stay_id
-)
-
-, pf_72h AS (
-    SELECT
-      sf.stay_id
-    , AVG(pao2fio2ratio_novent) AS pf_48_72h
-
-    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
-
-    WHERE pao2fio2ratio_novent is NOT NULL
-    AND hr >= 48
-    AND hr <= 72
-    GROUP BY stay_id
-)
-
-, pf_96h AS (
-    SELECT
-      sf.stay_id
-    , AVG(pao2fio2ratio_novent) AS pf_72_96h
-
-    FROM  `physionet-data.mimiciv_derived.sofa`  AS sf
-
-    WHERE pao2fio2ratio_novent is NOT NULL
-    AND hr >= 72
-    AND hr <= 96
-    GROUP BY stay_id
-)
-
 -- auxiliary table for labs, custom because are not in the derived ones!
 , labs_24h AS (
   SELECT lab.hadm_id,
@@ -1007,16 +955,6 @@ LEFT JOIN uo_72h
 ON uo_72h.stay_id = icu.stay_id
 LEFT JOIN uo_96h
 ON uo_96h.stay_id = icu.stay_id
-
--- Add po2_fio2_ratio per day
-LEFT JOIN pf_24h
-ON pf_24h.stay_id = icu.stay_id
-LEFT JOIN pf_48h
-ON pf_48h.stay_id = icu.stay_id
-LEFT JOIN pf_72h
-ON pf_72h.stay_id = icu.stay_id
-LEFT JOIN pf_96h
-ON pf_96h.stay_id = icu.stay_id
 
 -- Add FiO2 per day
 LEFT JOIN fio2_24h
