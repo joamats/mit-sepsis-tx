@@ -107,4 +107,4 @@ for cohort in cohorts:
                                             "2.5%": CI_lower,
                                             "97.5%": CI_upper}, ignore_index=True)
             # save results as we go
-            #results_df.to_csv(f"results/models/{setting}.csv", index=False)
+            results_df.to_csv(f"results/models/{setting}.csv", index=False)
