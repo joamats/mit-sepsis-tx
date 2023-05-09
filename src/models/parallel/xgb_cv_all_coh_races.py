@@ -9,7 +9,7 @@ from joblib import Parallel, delayed
 setting = "sens/xgb_cv_all_coh_races"
 
 # Number of parallel processes
-num_processes = 5
+num_processes = 6
 
 # Function to train the XGBoost model, calculate SHAP values, and calculate OR for a fold
 def train_model(train_index, test_index):
