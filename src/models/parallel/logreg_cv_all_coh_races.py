@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 setting = "sens/logreg_cv_all_coh_races"
 
 # Set number of processes to run in parallel
-num_processes = 5
+num_processes = 8
 
 # Function to train the logistic regression model and calculate OR for a fold
 def train_model(train_index, test_index):
