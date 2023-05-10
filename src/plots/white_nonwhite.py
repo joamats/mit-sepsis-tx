@@ -57,7 +57,7 @@ def plot_results(filename, model_name):
     fig.savefig(f"results/plots/{filename}.png", dpi=300, bbox_inches="tight")
 
 
-filenames = ["logreg_cv_all_coh", "xgb_cv_all_coh"]
+filenames = ["sens/logreg_cv_all_coh", "sens/xgb_cv_all_coh"]
 model_names = ["Logistic Regression", "XGBoost"]
 
 for f, m in zip(filenames, model_names):
