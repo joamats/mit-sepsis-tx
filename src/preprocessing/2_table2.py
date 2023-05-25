@@ -208,6 +208,7 @@ tables = []
 for i in range(len(treatments)):
 
     table = pd.read_excel(f'results/table2/{treatments[i]}.xlsx')
+
     tables.append(table)
 
 # concatenate in a single table, but index just once

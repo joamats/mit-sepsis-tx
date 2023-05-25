@@ -15,8 +15,7 @@ with open("config/treatments.txt", "r") as f:
 treatments.remove("treatment")
 
 results_df = pd.DataFrame(columns=["cohort","treatment",
-                                   "model","converged",
-                                   "AUC","Brier"])
+                                   "metric","value"])
 
 cohorts = [1,2,3,4]
 
@@ -26,7 +25,7 @@ for cohort in cohorts:
     for treatment in treatments:
         print(f"Treatment: {treatment}")
         # load data
-        data = pd.read_csv(f"data/clean/coh_{cohort}_{treatment[:-5]}.csv")
+        data = pd.read_csv(f"data/sens/clean/coh_{cohort}_{treatment[:-5]}.csv")
 
         conf = confounders + [t for t in treatments if t != treatment] 
 
@@ -45,22 +44,27 @@ for cohort in cohorts:
 
         # AUC & Brier score
         y_pred_proba = model.predict_proba(X_test)[:,1]
+
         auc = roc_auc_score(y_test, y_pred_proba)
         brier = brier_score_loss(y_test, y_pred_proba)
+
 
         # append results to dataframe
         results_df = results_df.append({"cohort": cohort,
                                         "treatment": treatment,
                                         "model": "XGBoost",
-                                        "converged": "",
-                                        "AUC": auc,
-                                        "Brier": brier}, ignore_index=True)
+                                        "metric": "AUC",
+                                        "value": auc}, ignore_index=True)
+
+        results_df = results_df.append({"cohort": cohort,
+                                        "treatment": treatment,
+                                        "model": "XGBoost",
+                                        "metric": "Brier",
+                                        "value": brier}, ignore_index=True)
 
         # Now Logistic Regression
         model = LogisticRegression(max_iter=10000)
         model.fit(X_train, y_train)
-
-        converged_ = model.n_iter_ #< model.max_iter
 
         # AUC & Brier score
         y_pred_proba = model.predict_proba(X_test)[:,1]
@@ -71,9 +75,20 @@ for cohort in cohorts:
         results_df = results_df.append({"cohort": cohort,
                                         "treatment": treatment,
                                         "model": "LogReg",
-                                        "converged": converged_[0],
-                                        "AUC": auc,
-                                        "Brier": brier}, ignore_index=True)
+                                        "metric": "Brier",
+                                        "value": brier}, ignore_index=True)
         
-        results_df.to_csv("results/models_audit.csv", index=False)
+        # append results to dataframe
+        results_df = results_df.append({"cohort": cohort,
+                                        "treatment": treatment,
+                                        "model": "LogReg",
+                                        "metric": "AUC",
+                                        "value": auc}, ignore_index=True)
+        
+        
+results_df = results_df.pivot(index=['cohort', 'metric'], columns=['treatment', 'model'], values=['value'])
+results_df.to_csv("results/models_audit.csv")
+
+
+
 
