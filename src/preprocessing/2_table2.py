@@ -191,7 +191,7 @@ def table_one(treatment, hr_bound):
                         missing=False, overall=False,
                         dip_test=True, normal_test=True, tukey_test=True, htest_name=True)
 
-    table1_s.to_excel(f'results/table1/main/{treatment}.xlsx')
+    table1_s.to_excel(f'results/table2/{treatment}.xlsx')
 
     # save data for further analysi
     data.to_csv(f'data/sens/MIMIC_coh_1_{treatment}.csv', index=False)
@@ -207,23 +207,10 @@ tables = []
 # Read all tables and merge them with a loop
 for i in range(len(treatments)):
 
-    table = pd.read_excel(f'results/table1/main/{treatments[i]}.xlsx')
-
-    if i == 0:
-        # keep just the first 2 columns
-        tables.append(table.iloc[:, :2])
-
-    # drop the first 2 columns
-    table = table.iloc[:, 2:]
-
-    # add a row with the treatment name for both columns
-    table.loc[-1] = [treatments[i], treatments[i]]
-    table.index = table.index + 1
-    table = table.sort_index()
-    
+    table = pd.read_excel(f'results/table2/{treatments[i]}.xlsx')
     tables.append(table)
 
 # concatenate in a single table, but index just once
 table1 = pd.concat(tables, axis=1)
 
-table1.to_excel('results/table1/main/all.xlsx', index=False, header=False)
+table1.to_excel('results/table2/all.xlsx', index=False, header=False)
