@@ -30,7 +30,8 @@ df4 = df3[(df3.ckd_stages <= 3)]
 print(f"Removed {len(df3) - len(df4)} stays with CKD stage > 3")
 demo4 = print_demo(get_demography(df4))
 print(f"{len(df4)} stays with sepsis, full code, known race, and 1 day <= ICU LoS, and no CKD stage >3 \n({demo4})\n")
-
+# save df4
+df4.to_csv('data/MIMIC_for_table1.csv')
 
 # Create 4 new cohorts, iterating, removing patients with LoS < 2 day , 3 days, 4 days, 5 days
 for los_min in range(2, 6):
