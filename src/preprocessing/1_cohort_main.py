@@ -5,6 +5,7 @@ from utils import get_demography, print_demo
 
 df0 = pd.read_csv('data/MIMIC_data.csv')
 df0.ckd_stages = df0.ckd_stages.fillna(0)
+print("\nNumbers for main analysis with strict inclusion criteria")
 print(f"\n{len(df0)} stays in the ICU")
 
 # Remove patients without sepsis
@@ -34,7 +35,7 @@ print(f"{len(df4)} stays with sepsis, full code, known race, and 1 day <= ICU Lo
 df4.to_csv('data/MIMIC_for_table1.csv')
 
 # Create 4 new cohorts, iterating, removing patients with LoS < 2 day , 3 days, 4 days, 5 days
-for los_min in range(2, 6):
+for i, los_min in enumerate(range(2, 6)):
     # Remove patients with LoS < {los_min} days
     print(f"\nRamification Starts for Cohort {los_min-1}\n")
     df5 = df4[df4.los_icu >= los_min]
@@ -49,7 +50,76 @@ for los_min in range(2, 6):
 
     print(f"Removed {len(df5) - len(df6)} recurrent stays")
     demo6 = print_demo(get_demography(df6))
-    print(f"{len(df6)} stays with sepsis, {los_min} day <= ICU LoS , full code, race known \n({demo6})\n")
+    print(f"{len(df6)} stays with sepsis, {los_min} day <= ICU LoS, full code, race known \n({demo6})\n")
 
-    df6.to_csv(f'data/MIMIC_coh_{los_min-1}.csv')
+    print(f"\nSub-Ramification Starts for Treatment-specific Elegibity Inclusion Criteria\n")
+
+    # Remove patients that don't meet MV criteria
+    MV_masks = []
+    for j in range(i+1):
+        MV_masks.append(df6[f"pf_{hr_periods[j]}"] <= 300)
+        MV_masks.append(df6[f"pco2_min_{hr_periods[j]}"] >= 60)
+        MV_masks.append(df6[f"resp_rate_mean_{hr_periods[j]}"] >= 20)
+
+    # create a single mask that is an OR of all masks
+    MV_mask = MV_masks[0]
+    for m in MV_masks[1:]:
+        MV_mask = MV_mask | m
+
+    df7_MV = df6[MV_mask]
+    print(f"Removed {len(df6) - len(df7_MV)} stays that don't meet MV criteria")
+
+    demo7_MV = print_demo(get_demography(df7_MV))
+    print(f"{len(df7_MV)} stays with all above and MV elegibility criteria met \n({demo7_MV})\n")
+
+    df7_MV.to_csv(f'data/sens/MIMIC_coh_{los_min-1}_MV.csv')
+
+    # Remove patients that don't meet RRT criteria
+    # impute missing weight_admit, depends on the sex
+    # 77kg for sex_female == 1, 90kg for sex_female == 0
+    df6.weight_admit = df6.weight_admit.fillna(-1)
+    df6.weight_admit = df6.apply(lambda row: 77 if (row.weight_admit == -1) & \
+                                                   (row.sex_female == 1) \
+                                                else row.weight_admit, axis=1)
+    df6.weight_admit = df6.apply(lambda row: 90 if (row.weight_admit == -1) & \
+                                                   (row.sex_female == 0) \
+                                                else row.weight_admit, axis=1)
+    RRT_masks = []
+    for j in range(i+1):
+        # compute uo/weight
+        df6[f"uo_weight_{hr_periods[j]}"] = df6[f"uo_{hr_periods[j]}"] / df6.weight_admit
+        RRT_masks.append(df6[f"uo_weight_{hr_periods[j]}"] <= 12)
+        RRT_masks.append(df6[f"potassium_min_{hr_periods[j]}"] >= 6.5)
+        RRT_masks.append((df6[f"ph_max_{hr_periods[j]}"] <= 7.2) & (df6[f"bicarbonate_max_{hr_periods[j]}"] <= 12))
+
+    # create a single mask that is an OR of all masks
+    RRT_mask = RRT_masks[0]
+    for m in RRT_masks[1:]:
+        RRT_mask = RRT_mask | m
+
+    df7_RRT = df6[RRT_mask]
+    print(f"Removed {len(df6) - len(df7_RRT)} stays that don't meet RRT criteria")
+
+    demo7_RRT = print_demo(get_demography(df7_RRT))
+    print(f"{len(df7_RRT)} stays with all above and RRT elegibility criteria met \n({demo7_RRT})\n")
+
+    df7_RRT.to_csv(f'data/sens/MIMIC_coh_{los_min-1}_RRT.csv')
+                                
+    # Remove patients that don't meet VP criteria
+    VP_masks = []
+    for j in range(i+1):
+        VP_masks.append(df6[f"mbp_mean_{hr_periods[j]}"] <= 65)
+        VP_masks.append(df6[f"lactate_min_{hr_periods[j]}"] >= 2)
+
+    # create a single mask that is an OR of all masks
+    VP_mask = VP_masks[0]
+    for m in VP_masks[1:]:
+        VP_mask = VP_mask | m
+
+    df7_VP = df6[VP_mask]
+    print(f"Removed {len(df6) - len(df7_VP)} stays that don't meet VP criteria")
+
+    demo7_VP = print_demo(get_demography(df7_VP))
+    print(f"{len(df7_VP)} stays with all above and VP elegibility criteria met \n({demo7_VP})\n")
     
+    df7_VP.to_csv(f'data/sens/MIMIC_coh_{los_min-1}_VP.csv')
