@@ -54,7 +54,8 @@ def plot_results(filename, model_name):
     plt.tight_layout()
 
     # Save the figure
-    fig.savefig(f"results/plots/{filename}.png", dpi=300, bbox_inches="tight")
+    #fig.savefig(f"results/plots/{filename}.png", dpi=300, bbox_inches="tight")
+    fig.savefig(f"results/plots/{filename}.jpeg", dpi=600, bbox_inches="tight")
 
 
 filenames = ["sens/logreg_cv_all_coh", "sens/xgb_cv_all_coh"]
