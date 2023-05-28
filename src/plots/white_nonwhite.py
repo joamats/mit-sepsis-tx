@@ -44,13 +44,13 @@ def plot_results(filename, model_name):
         ax.set_xlim([0.5, 1.5])
         # set xticks in string format
         ax.set_yticks([1,2,3,4])
-        ax.set_yticklabels(["0 - 1", "0 - 2", "0 - 3", "0 - 4"])
+        ax.set_yticklabels(["1", "2", "3", "4"])
         ax.set_xlabel("Favours White | Favours R.E.G",
                     fontsize=8, labelpad=5, color='gray')
 
 
     fig.supxlabel('Odds Ratio (95% CI)')
-    fig.supylabel('Elegibility Window (days)')
+    fig.supylabel('Cohort Number')
     plt.tight_layout()
 
     # Save the figure
@@ -58,8 +58,10 @@ def plot_results(filename, model_name):
     fig.savefig(f"results/plots/{filename}.jpeg", dpi=600, bbox_inches="tight")
 
 
-filenames = ["sens/logreg_cv_all_coh", "sens/xgb_cv_all_coh"]
-model_names = ["Logistic Regression", "XGBoost"]
+filenames = ["sens/logreg_cv_all_coh", "sens/xgb_cv_all_coh",
+             "logreg_cv_all_coh", "xgb_cv_all_coh"]
+model_names = ["Logistic Regression", "XGBoost",
+               "Logistic Regression", "XGBoost"]
 
 for f, m in zip(filenames, model_names):
     plot_results(f, m)
