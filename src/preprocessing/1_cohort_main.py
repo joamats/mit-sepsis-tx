@@ -34,6 +34,8 @@ print(f"{len(df4)} stays with sepsis, full code, known race, and 1 day <= ICU Lo
 # save df4
 df4.to_csv('data/MIMIC_for_table1.csv')
 
+hr_periods = ["6_24h", "24_48h", "48_72h", "72_96h"]
+
 # Create 4 new cohorts, iterating, removing patients with LoS < 2 day , 3 days, 4 days, 5 days
 for i, los_min in enumerate(range(2, 6)):
     # Remove patients with LoS < {los_min} days

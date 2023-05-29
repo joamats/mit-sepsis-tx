@@ -47,7 +47,9 @@ def table_one(treatment, hr_bound):
 
     # Encode diabetes and CKD 0 as "Absent"
     data['diabetes_types'] = data['diabetes_types'].apply(lambda x: "Absent" if x == 0 else x)
-    data['ckd_stages'] = data['ckd_stages'].apply(lambda x: "Absent" if x == 0 else x)
+    # data['ckd_stages'] = data['ckd_stages'].apply(lambda x: "Absent" if x == 0 else x)
+    # collapse CKD into binary -> CKD stage == 3 or CKD stage < 3
+    #data['ckd_stages'] = data['ckd_stages'].apply(lambda x: 1 if x == 3 else 0)
 
     order = {
         #"race_group": ["White", "Black", "Hispanic", "Asian", "Other"],
@@ -192,9 +194,6 @@ def table_one(treatment, hr_bound):
                         dip_test=True, normal_test=True, tukey_test=True, htest_name=True)
 
     table1_s.to_excel(f'results/table2/{treatment}.xlsx')
-
-    # save data for further analysi
-    data.to_csv(f'data/sens/MIMIC_coh_1_{treatment}.csv', index=False)
 
 
 treatments = ["MV", "RRT", "VP"]
