@@ -102,8 +102,7 @@ def table_one(treatment, hr_bound):
             "skin": 1,
             }
     
-    categ = ['anchor_year_group',
-             'gender',
+    categ = ['gender',
              'insurance',
              'eng_prof',
              'adm_elective',
@@ -140,7 +139,6 @@ def table_one(treatment, hr_bound):
 
     labls = {
         'anchor_age': 'Age',
-        'anchor_year_group': 'Year of Admission',
         'admission_age': 'Age',
         'gender': 'Sex ',
         'mortality_in': "In-Hospital Mortality",
