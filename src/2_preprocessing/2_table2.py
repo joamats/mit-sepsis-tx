@@ -3,7 +3,7 @@ import pandas as pd
 
 def table_one(treatment, hr_bound):
 
-    data = pd.read_csv(f'data/sens/MIMIC_coh_1_{treatment}.csv')
+    data = pd.read_csv(f'data/main/MIMIC_coh_1_{treatment}.csv')
 
     # Encode race_white as being white vs. non-white
     data['race_white'] = data.race_group.apply(lambda x: "White" if x == "White" else "Racial-Ethnic Group")

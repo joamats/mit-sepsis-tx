@@ -25,7 +25,7 @@ for cohort in cohorts:
     for treatment in treatments:
         print(f"Treatment: {treatment}")
         # load data
-        data = pd.read_csv(f"data/sens/clean/coh_{cohort}_{treatment[:-5]}.csv")
+        data = pd.read_csv(f"data/main/clean/coh_{cohort}_{treatment[:-5]}.csv")
 
         conf = confounders + [t for t in treatments if t != treatment] 
 

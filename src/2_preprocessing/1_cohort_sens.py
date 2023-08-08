@@ -53,5 +53,5 @@ for los_min in range(2, 6):
     demo6 = print_demo(get_demography(df6))
     print(f"{len(df6)} stays with sepsis, {los_min} day <= ICU LoS , full code, race known \n({demo6})\n")
 
-    df6.to_csv(f'data/MIMIC_coh_{los_min-1}.csv')
+    df6.to_csv(f'data/sens/MIMIC_coh_{los_min-1}.csv')
     

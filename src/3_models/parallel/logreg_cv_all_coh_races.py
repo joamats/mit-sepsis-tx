@@ -3,8 +3,27 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
+from joblib import Parallel, delayed
 
-setting = "logreg_cv_all_coh_races"
+setting = "main/logreg_cv_all_coh_races"
+
+# Set number of processes to run in parallel
+num_processes = 8
+
+# Function to train the logistic regression model and calculate OR for a fold
+def train_model(train_index, test_index):
+    _, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
+    _, y_test = y.iloc[train_index], y.iloc[test_index]
+
+    # Fit logistic regression model
+    model = LogisticRegression(max_iter=10000)
+    model.fit(X_test, y_test)
+
+    idx = X_test.columns.get_loc(race)
+    param = model.coef_[0][idx]
+    OR_inner = np.exp(param)
+
+    return OR_inner
 
 # now read treatment from txt
 with open("config/treatments.txt", "r") as f:
@@ -28,7 +47,7 @@ for cohort in cohorts:
     for treatment in treatments:
         print(f"Treatment: {treatment}")
         # load data
-        data = pd.read_csv(f"data/clean/coh_{cohort}_{treatment[:-5]}.csv")
+        data = pd.read_csv(f"data/main/clean/coh_{cohort}_{treatment[:-5]}.csv")
 
         # append results to dataframe
         results_df = results_df.append({"cohort": cohort,
@@ -60,32 +79,18 @@ for cohort in cohorts:
             # outer loop
             for i in tqdm(range(n_rep)):
 
-                # list to append inner ORs
-                ORs = []
-
                 # normal k-fold cross validation
                 kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i)
             
-                # inner loop, in each fold
-                for train_index, test_index in tqdm(kf.split(X, r)):
-                    X_train, X_test = X.iloc[train_index,:], X.iloc[test_index,:]
-                    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+                # Inner loop, in each fold, running in parallel
+                ORs = Parallel(n_jobs=num_processes)(
+                    delayed(train_model)(train_index, test_index)
+                    for train_index, test_index in tqdm(kf.split(X, r))
+                )
 
-                    # # Fit logistic regression model
-                    model = LogisticRegression(max_iter=10000)
-                    model.fit(X_test, y_test)
-
-                    idx = X_test.columns.get_loc(race)
-                    param = model.coef_[0][idx]
-                    OR_inner = np.exp(param)
-
-                    # # append OR to list
-                    ORs.append(OR_inner)
-
-                    print(f"OR: {OR_inner:.5f}")
-
-                # calculate odds ratio based on all 5 folds, append
-                odds_ratios.append(np.mean(ORs))
+                # Calculate odds ratio based on all 5 folds
+                odds_ratio = np.mean(ORs)
+                odds_ratios.append(odds_ratio)
 
             # calculate confidence intervals
             CI_lower = np.percentile(odds_ratios, 2.5)

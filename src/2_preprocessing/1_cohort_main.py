@@ -74,7 +74,7 @@ for i, los_min in enumerate(range(2, 6)):
     demo7_MV = print_demo(get_demography(df7_MV))
     print(f"{len(df7_MV)} stays with all above and MV elegibility criteria met \n({demo7_MV})\n")
 
-    df7_MV.to_csv(f'data/sens/MIMIC_coh_{los_min-1}_MV.csv')
+    df7_MV.to_csv(f'data/main/MIMIC_coh_{los_min-1}_MV.csv')
 
     # Remove patients that don't meet RRT criteria
     # impute missing weight_admit, depends on the sex
@@ -105,7 +105,7 @@ for i, los_min in enumerate(range(2, 6)):
     demo7_RRT = print_demo(get_demography(df7_RRT))
     print(f"{len(df7_RRT)} stays with all above and RRT elegibility criteria met \n({demo7_RRT})\n")
 
-    df7_RRT.to_csv(f'data/sens/MIMIC_coh_{los_min-1}_RRT.csv')
+    df7_RRT.to_csv(f'data/main/MIMIC_coh_{los_min-1}_RRT.csv')
                                 
     # Remove patients that don't meet VP criteria
     VP_masks = []
@@ -124,4 +124,4 @@ for i, los_min in enumerate(range(2, 6)):
     demo7_VP = print_demo(get_demography(df7_VP))
     print(f"{len(df7_VP)} stays with all above and VP elegibility criteria met \n({demo7_VP})\n")
     
-    df7_VP.to_csv(f'data/sens/MIMIC_coh_{los_min-1}_VP.csv')
+    df7_VP.to_csv(f'data/main/MIMIC_coh_{los_min-1}_VP.csv')

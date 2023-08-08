@@ -4,7 +4,7 @@ import numpy as np
 
 def clean_data(cohort_number, hr_bound, treatment):
 
-    data = pd.read_csv(f'data/sens/MIMIC_coh_{cohort_number}_{treatment}.csv')
+    data = pd.read_csv(f'data/main/MIMIC_coh_{cohort_number}_{treatment}.csv')
 
     # Start of Operations that in the main analysis are being done in the table1 script
 
@@ -193,7 +193,7 @@ def clean_data(cohort_number, hr_bound, treatment):
                  ['pneumonia', 'uti', 'biliary', 'skin']
     ]
 
-    data.to_csv(f'data/sens/clean/coh_{cohort_number}_{treatment}.csv', index=False)
+    data.to_csv(f'data/main/clean/coh_{cohort_number}_{treatment}.csv', index=False)
 
 # Main
 cohorts = [1,2,3,4]

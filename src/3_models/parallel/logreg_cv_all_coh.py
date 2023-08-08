@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from joblib import Parallel, delayed
 
-setting = "sens/logreg_cv_all_coh"
+setting = "main/logreg_cv_all_coh"
 
 # Set number of processes to run in parallel
 num_processes = 8
@@ -48,7 +48,7 @@ for cohort in cohorts:
     for treatment in treatments:
         print(f"Treatment: {treatment}")
         # load data
-        data = pd.read_csv(f"data/sens/clean/coh_{cohort}_{treatment[:-5]}.csv")
+        data = pd.read_csv(f"data/main/clean/coh_{cohort}_{treatment[:-5]}.csv")
 
         for race in races:
             print(f"Race-Ethnicity: {race}")

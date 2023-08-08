@@ -6,7 +6,7 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import StratifiedKFold
 from joblib import Parallel, delayed
 
-setting = "sens/xgb_cv_all_coh_races"
+setting = "main/xgb_cv_all_coh_races"
 
 # Number of parallel processes
 num_processes = 6
@@ -58,7 +58,7 @@ for cohort in cohorts:
     for treatment in treatments:
         print(f"Treatment: {treatment}")
         # load data
-        data = pd.read_csv(f"data/sens/clean/coh_{cohort}_{treatment[:-5]}.csv")
+        data = pd.read_csv(f"data/main/clean/coh_{cohort}_{treatment[:-5]}.csv")
 
         # append results to dataframe
         results_df = results_df.append({"cohort": cohort,
